@@ -24,6 +24,7 @@ Every system is different, I can't give you a 100% guarantee!
 ```
 python -m venv venv
 source venv/bin/activate
+sudo pacman -S p7zip
 wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
 7z x libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
 export LLVM_INSTALL_DIR=$PWD/libclang
@@ -39,13 +40,15 @@ pip install pyside6
 sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl
 ```
 
-> Now Download the source code for Python 3.10.13 from Python.org
-<br> Extract the sources and go into the directory
-
+### Python 3.10
 ```
+wget "https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tar.xz"
+tar -xvf Python-3.10.13.tar.xz
+cd Python-3.10.13
 ./configure --enable-optimizations --enable-shared
 make -j 8
 sudo make altinstall # ALTINSTALL not INSTALL, otherwise will break your Arch Linux
+cd
 ```
 
 `export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
@@ -89,26 +92,21 @@ export PATH="${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_
 echo "export ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" >> ~/.bashrc
 echo "export ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT}" >> ~/.bashrc
 echo "export PATH=\${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_ROOT}" >> ~/.bashrc
+cd Android/Sdk/ndk/25c/android-ndk-r25c/
+cp -r * ../
+cd ~/Android/Sdk
+mkdir tools
+cd ~/Android/Sdk/cmdline-tools/cmdline-tools/
+cp -r * ../../tools/
+cd ~/Android/Sdk/cmdline-tools/cmdline-tools/bin/
+./sdkmanager "platforms;android-29"
+
 
 echo "Android SDK and NDK installation completed."
 echo "Paths added to .bashrc. Please restart your terminal or source your .bashrc file."
 
 
 ```
-
-> Okay now we need to do something weird:
-
-> Your Android SDK should be in your home directory. In my case it's this path:
-/home/asuna/Android/Sdk/
-
-
-Go to this path: `Android/Sdk/cmdline-tools/cmdline-tools/`
-<br>Now to: `cp -r * ../../`
-
-I don't know why and how I figured this out, but it's needed.
-
-Now go in this path: `Android/Sdk/cmdline-tools/cmdline-tools/bin`
-<br>And execute this: `sdkmanager "platforms;android-29"`
 
 ### If you got this point, the setup is done: Congratulations
 
@@ -141,9 +139,11 @@ if __name__ == "__main__":
 
 
 ## First Command:
+Go into Pyside-setup folder and execute this command
+
 -- plat: Your platform. Most modern Android devices have `aarch64`
 
-`python tools/cross_compile_android/main.py --plat-name=aarch64 --ndk-path=$ANDROID_NDK_ROOT --qt-install-path=/opt/Qt/6.6.1 --sdk-path=$ANDROID_SDK_ROOT`
+`python tools/cross_compile_android/main.py --plat-name=aarch64 --ndk-path=$ANDROID_NDK_ROOT --qt-install-path=/home/$USER/Qt/6.6.1 --sdk-path=$ANDROID_SDK_ROOT --api-level 29`
 
 
 # If this command executed fine, you have already 50%
@@ -167,7 +167,7 @@ EVERYTHING ELSE WILL NOT WORK!!!!!!!!!!!!!!!!!!!!
 
 EXECUTE THIS COMMAND FROM YOUR TEST  FOLDER WHERE YOUR main.py FILE IS!
 
-`pyside6-android-deploy --wheel-pyside=/home/asuna/pyside-setup/dist/PySide6-6.6.1-6.6.1-cp37-abi3-android_aarch64.whl --wheel-shiboken=/home/asuna/pyside-setup/dist/shiboken6-6.6.1-6.6.1-cp37-abi3-android_aarch64.whl --name=main --ndk-path /home/asuna/Android/Sdk/ndk/25c/ --sdk-path /home/asuna/Android/Sdk/`
+`pyside6-android-deploy --wheel-pyside=/home/$USER/pyside-setup/dist/PySide6-6.6.1-6.6.1-cp37-abi3-android_aarch64.whl --wheel-shiboken=/home/$USER/pyside-setup/dist/shiboken6-6.6.1-6.6.1-cp37-abi3-android_aarch64.whl --name=main --ndk-path ~/Android/Sdk/ndk/25c/ --sdk-path ~/Android/Sdk/`
 
 
 # Now you should have your apk in your test folder.

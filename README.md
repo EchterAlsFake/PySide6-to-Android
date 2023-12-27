@@ -173,6 +173,25 @@ EXECUTE THIS COMMAND FROM YOUR TEST  FOLDER WHERE YOUR main.py FILE IS!
 # Now you should have your apk in your test folder.
 
 
+# External libraries
+
+Including external libraries is a bit complicated, because the pyside6-android-deploy scripts is a bit buggy.
+
+
+You need to go into the PySide6.scripts folder and modify the android_deploy.py script. 
+Search for the `# run buildozer` comment. Add a input("Add your libraries") under it.
+
+
+Now execute the pyside6-android-deploy script as always and wait for it. When you see your "Add your libraries"
+you need to go into the buildozer.spec file and append your requirements to the line, `requirements`
+
+
+Please note: Not every third party library works out of the box. Simple modules can work, but don't expect
+tensorflow or similar libraries to work :D
+
+
+
+
 
 
 

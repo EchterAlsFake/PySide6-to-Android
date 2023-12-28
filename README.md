@@ -92,7 +92,7 @@ export PATH="${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_
 echo "export ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" >> ~/.bashrc
 echo "export ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT}" >> ~/.bashrc
 echo "export PATH=\${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_ROOT}" >> ~/.bashrc
-cd Android/Sdk/ndk/25c/android-ndk-r25c/
+cd ~/Android/Sdk/ndk/25c/android-ndk-r25c/
 cp -r * ../
 cd ~/Android/Sdk
 mkdir tools

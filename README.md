@@ -32,10 +32,11 @@ This guide outlines a method to use PySide6 for Android development. It is impor
    pip install -r requirements.txt
    pip install –r tools/cross_compile_android/requirements.txt
    pip install pyside6
+   cd
    ```
 3. Install additional development tools and Android-specific packages:
    ```
-   sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl
+   sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake
    ```
 
 ### Python 3.10
@@ -104,7 +105,7 @@ This guide outlines a method to use PySide6 for Android development. It is impor
    
    
    echo "Android SDK and NDK installation completed."
-   echo "Paths added to .bashrc. Please restart your terminal or source your .bashrc file."
+   cd
    ```
    The script will handle the downloading, unzipping, and setting of environment variables for the SDK and NDK.
 

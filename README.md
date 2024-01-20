@@ -13,16 +13,12 @@ This guide outlines a method to use PySide6 for Android development. It is impor
 ## Installation Guide
 
 ### Qt Requirements
-1. Set up a Python virtual environment and activate it:
+
+1. Install necessary packages using pacman and download Qt prerequisites:
    ```
    python -m venv venv
    source venv/bin/activate
-   ```
-2. Install necessary packages using pacman and download Qt prerequisites:
-   ```
-   python -m venv venv
-   source venv/bin/activate
-   sudo pacman -S p7zip
+   sudo pacman -S p7zip wget
    wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
    7z x libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
    export LLVM_INSTALL_DIR=$PWD/libclang
@@ -34,13 +30,13 @@ This guide outlines a method to use PySide6 for Android development. It is impor
    pip install pyside6
    cd
    ```
-3. Install additional development tools and Android-specific packages:
+2. Install additional development tools and Android-specific packages:
    ```
    sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake
    ```
 
 ### Python 3.10
-4. Download and compile Python 3.10:
+3. Download and compile Python 3.10:
    ```
    wget "https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tar.xz"
    tar -xvf Python-3.10.13.tar.xz
@@ -52,13 +48,13 @@ This guide outlines a method to use PySide6 for Android development. It is impor
    ```
    Note: Use 'altinstall' to avoid breaking Arch Linux.
 
-5. Set the library path:
+4. Set the library path:
    ```
    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
    ```
 
 ### Android SDK and NDK
-6. Automate the SDK and NDK setup by creating and executing a bash script.
+5. Automate the SDK and NDK setup by creating and executing a bash script.
    <br>Just paste this into your terminal and wait:
    ```bash
    #!/bin/bash

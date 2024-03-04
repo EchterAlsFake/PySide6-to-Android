@@ -4,15 +4,47 @@
 ## Please Note
 This guide outlines a method to use PySide6 for Android development. It is important to remember that this process might differ depending on your system setup. Success is not guaranteed, as I have not tested this with QML, though it should theoretically work.
 
+# Table of Contents
+
+- [Requirements](#requirements)
+- [Basic Knowledge](#basic-knowledge--understanding)
+- [Qt requirements](#qt-requirements)
+- [Python 3.10](#python-310)
+- [Android SDK / NDK](#android-sdk-and-ndk)
+- [Building Qt wheels](#building-the-qt-wheels)
+- [Building the APK](#building-the-apk)
+- [App Icons](#app-icons)
+- [Debugging](#debugging--error-finding)
+- [IMPORTANT](#special-note-on-charset_normalizer)
+- [Storage Permissions](#storage-permissions)
+- [Errors](#errors)
+- [Contributions](#contributions--issues)
+- [Support](#support)
+
 ## Requirements
 - Operating System: Arch Linux
-- Qt Version: 6.6.1 (suitable for both Desktop and Android development)
-- Java Development Kit: OpenJDK 17 (not version 21)
-- Python: Version 3.10 compiled with shared libraries
+- Qt Version: 6.6.1 (In the Qt unified installer check the options for "Android" and "Desktop" Development
 
-## Installation Guide
+## Basic Knowledge / Understanding
+
+What we are doing here is to build PySide6 and Shiboken6 for the different Android architectures.
+Basically Qt relies on some C code which is why we need to build it in this very special way. You can't just
+specify PySide6 in the buildozers requirements and expect everything to work. This is why we are doing all this here.
+At the end of compiling you will have two .whl files for PySide6 and Shiboken6. For every architecture two pieces.
+
+There are multiple Android architectures:
+
+- aarch64
+- i686
+- x86_64
+- armv7a
+
+What you want to build first is aarch64 af this is where most devices run.
+
+Information: I did NOT successfully build any other than aarch64 and I wasn't able to fix errors. Hopefully this process will be fixed in the future.
 
 ### Qt Requirements
+
 
 1. Install necessary packages using pacman and download Qt prerequisites:
    ```
@@ -36,6 +68,10 @@ This guide outlines a method to use PySide6 for Android development. It is impor
    ```
 
 ### Python 3.10
+
+> Python3.10 is only needed to build the Qt wheels for PySide6 and Shiboken6.
+> Python3.10 is NOT needed to deploy the Android app itself
+
 3. Download and compile Python 3.10:
    ```
    wget "https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tar.xz"
@@ -55,7 +91,11 @@ This guide outlines a method to use PySide6 for Android development. It is impor
 
 ### Android SDK and NDK
 5. Automate the SDK and NDK setup by creating and executing a bash script.
-   <br>Just paste this into your terminal and wait:
+   <br>Just paste this into your terminal and wait
+
+I know that the Qt build tool also has an option to automatically download the NDK, BUT this won't work for buildozer later.
+Just use this script and you won't have errors.
+
    ```bash
    #!/bin/bash
 
@@ -105,7 +145,7 @@ This guide outlines a method to use PySide6 for Android development. It is impor
    ```
    The script will handle the downloading, unzipping, and setting of environment variables for the SDK and NDK.
 
-## Building Your First App
+## Building the Qt wheels
 1. Create a test folder and place a `main.py` file in it with the following content:
    ```py
    from PySide6.QtWidgets import QApplication, QLabel
@@ -120,19 +160,20 @@ This guide outlines a method to use PySide6 for Android development. It is impor
        main()
    ```
 
+Your app must be named "main.py" this is a requirement from Python for Android
+
 2. Execute the following commands in the PySide-setup folder:
    ```
    python tools/cross_compile_android/main.py --plat-name=aarch64 --ndk-path=$ANDROID_NDK_ROOT --qt-install-path=/home/$USER/Qt/6.6.1 --sdk-path=$ANDROID_SDK_ROOT --api-level 29
    ```
-   This command prepares your environment for Android development.
+   Now if this did run successfully you should have the .whl files for aarch64 in the "dist" folder.
+   You can now ALWAYS reuse them for all your projects. You don't need to build them again.
 
-
-3. Build the APK:
-    <br>You'll find the wheels in the pyside-setup/dist/ folder.
-    ```
-   pyside6-android-deploy --wheel-pyside=/home/$USER/pyside-setup/dist/PySide6-6.6.1-6.6.1-cp37-abi3-android_aarch64.whl --wheel-shiboken=/home/$USER/pyside-setup/dist/shiboken6-6.6.1-6.6.1-cp37-abi3-android_aarch64.whl --name=main --ndk-path ~/Android/Sdk/ndk/25c/ --sdk-path ~/Android/Sdk/
-   ```
-   After successful execution, you will find the APK in your test folder.
+# Building the APK
+   The wheels are in pyside-setup/dist/
+    
+   ```pyside6-android-deploy --wheel-pyside=/home/$USER/pyside-setup/dist/PySide6-6.6.1-6.6.1-cp37-abi3-android_aarch64.whl --wheel-shiboken=/home/$USER/pyside-setup/dist/shiboken6-6.6.1-6.6.1-cp37-abi3-android_aarch64.whl --name=main --ndk-path ~/Android/Sdk/ndk/25c/ --sdk-path ~/Android/Sdk/```
+   <br>After successful execution, you will find the APK in your test folder.
 
 ## Including External Libraries
 Incorporating external libraries requires modification to the `android_deploy.py` script in the PySide6 scripts folder. Go into your venv folder and navigate to the PySide6/scripts path.
@@ -141,87 +182,41 @@ script wait until you see your created input statement. Then go into the buildoz
 
 # Pysidedeploy.spec
 
-After your first successful run, you can use the `-c` flag when using `pyside6-android-deploy`. With that, you can specify an
+After your first successful run, you can always use the `-c` flag when using `pyside6-android-deploy`. With that, you can specify an
 existing `pysidedeploy.spec` script. Have a look at it, because there you can change the title of your application, version
 number and a lot of other stuff.
+
+# App Icons
+
+When you would enter your requirements as described above, go into the buildozer.spec file and add the following line:
+
+icon.filename = <path_to_your_app_icon_png>
+
+# Debugging / Error finding
+
+I HIGHLY recommend to download the Android studio and run your App from Android Studio.
+Just connect your Phone or Tablet to your PC, enable USB Debugging and start your App from the Android
+Studio, because this will allow you to easily profile and debug your apk. You will see all Python tracebacks and it makes
+it much easier to debug.
 
 
 ## Special Note on 'charset_normalizer'
 If your project uses the 'requests' library or any other library dependent on 'charset_normalizer', ensure to specify the version `charset-normalizer==2.1.1` in your requirements.
 
-## Debugging and Error finding
-
-We can't use Android Studio for debugging, which makes it hard. Your app will often just crash without telling you why.
-Use this script as a server on your PC.  `pip install uvicorn fastapi pydantic`
-
-```python
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-
-
-class ErrorLog(BaseModel):
-    message: str
-
-
-app = FastAPI()
-
-
-@app.post("/error-log/")
-def receive_error_log(error_log: ErrorLog):
-    print(f"Received error: {error_log.message}")
-    return {"detail": "Error log received"}
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
-```
-
-Include this function into your main application:
-It doesn't need any dependencies, so it should run out of the box.
-```python
-import http.client
-import json
-
-def send_error_log(message):
-    url = "<your_pc's_ip:8000"
-    endpoint = "/error-log/"
-    data = json.dumps({"message": message})
-    headers = {"Content-type": "application/json"}
-
-    conn = http.client.HTTPConnection(url)
-
-    try:
-        conn.request("POST", endpoint, data, headers)
-        response = conn.getresponse()
-
-        if response.status == 200:
-            print("Error log sent successfully")
-        else:
-            print(f"Failed to send error log: Status {response.status}, Reason: {response.reason}")
-
-        conn.close()
-    except Exception as e:
-        print(f"Request failed: {e}")
-```
-
-Now you can work with try and except in your main application and send errors to your PC, phone or whatever.
-
 # Storage Permissions
 
-Kivy and Pyjnius don't work. We can't access the Java API on Android and therefore can't request Permissions.
-If you want to use the file system you must use `QFileDialog`. Use the `getExistingDirectory` method to prompt
-the user on selecting an output path. Android will then automatically ask the user to create a new folder for your
-application. Android will then give this folder the needed permissions for your App. It's a bit weird, but works.
+Kivy and Pyjnius don't work. We can't access the Java API on Android and therefore can't request Permissions at runtime.
+You need to use a lower Android API to ue the legacy storage paths in /storage/emulated/0/...
 
-Would look like this:
 
-```
-file_dialog = QFileDialog()
-self.directory = file_dialog.getExistingDirectory() # Will open a directory prompt
-```
+# Errors:
+
+- c compiler can not create executables
+<br>Solution: Jump from the bridge
+
+- blah blash blah is for x86_64 architecture not aarch64
+<br>Solution: Search online if the pip package has a verified aarch64 version. If it doesn't prepare for some months of work
+building the receipes lmao
 
 
 # Contributions / Issues
@@ -232,6 +227,4 @@ respond to them and try to help you as much as possible.  (Only for Arch Linux).
 Maybe someone of you can make an alternative readme for other distros. Would be nice :) 
 
 # Support
-
-Please spread this guide across forums, Qt blogs and give this repository a star. I don't want to be arrogant, but I am
-the first one who created such a comprehensive guide.
+I appreciate every star on this repo, as it shows me that my work is useful for people, and it keeps me motivated :)

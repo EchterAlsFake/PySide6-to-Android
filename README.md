@@ -211,6 +211,21 @@ You need to use a lower Android API to ue the legacy storage paths in /storage/e
 
 # Errors:
 
+- RuntimeError: "You are including a lot of QML files from a local venv..."
+
+This eror is related to your virtual environment. Make sure your virtual environment
+is NOT inside your projects folder. It doesn't matter where it is, but must not be in your projects
+folder. For example, if you have your main.py in a folder named my_project then your
+virtual environment can't be in this folder! 
+
+Create a new virtual environment in a different location and delete your old one with
+`rm -rf venv .venv` (or whatever you've called it)
+
+This is more an issue from Qt and will hopefully be fixed in a later Qt release, so that
+you don't need to do this anymore. I know it's confusing.
+
+
+
 - c compiler can not create executables
 <br>Solution: Jump from the bridge
 

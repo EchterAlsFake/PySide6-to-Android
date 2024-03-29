@@ -129,7 +129,7 @@ cd
 
 Execute the following commands in the PySide-setup folder:
    ```
-   python tools/cross_compile_android/main.py --plat-name=all --ndk-path=$ANDROID_NDK_ROOT --qt-install-path=/home/$USER/Qt/6.6.1 --sdk-path=$ANDROID_SDK_ROOT --api-level 29
+   python tools/cross_compile_android/main.py --plat-name=aarch64 --ndk-path=$ANDROID_NDK_ROOT --qt-install-path=/home/$USER/Qt/6.6.1 --sdk-path=$ANDROID_SDK_ROOT --api-level 29
    ```
    Now if this did run successfully, you should have the .whl files for every architecture in the "dist" folder.
    You can now ALWAYS reuse them for all your projects. You don't need to build them again.

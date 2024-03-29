@@ -31,6 +31,14 @@ export PATH="${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_
 echo "export ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" >> ~/.bashrc
 echo "export ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT}" >> ~/.bashrc
 echo "export PATH=\${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_ROOT}" >> ~/.bashrc
+cd ~/Android/Sdk/ndk/25c/android-ndk-r25c/
+cp -r * ../
+cd ~/Android/Sdk
+mkdir tools
+cd ~/Android/Sdk/cmdline-tools/cmdline-tools/
+cp -r * ../../tools/
+cd ~/Android/Sdk/cmdline-tools/cmdline-tools/bin/
+./sdkmanager "platforms;android-29"
+
 
 echo "Android SDK and NDK installation completed."
-echo "Paths added to .bashrc. Please restart your terminal or source your .bashrc file."

@@ -1,4 +1,9 @@
 
+> [!IMPORTANT]
+> I am currently investigating some issues with Qt 6.6.3.  Please use [THIS VERSION](https://github.com/EchterAlsFake/PySide6-to-Android/tree/66ebc82ac9d9036a5cc96ed5a58034fcfc87bdbf) of the README instead!, although success is not guaranteed.
+> I will test stuff the next days and show my results here. If you run into issues, please don't report them. It's a bit complicated right now, thanks for your patience.
+
+
 # PySide6 to Android
 
 ## Please Note

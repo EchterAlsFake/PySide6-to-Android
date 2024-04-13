@@ -35,6 +35,13 @@ NDK_URL="https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-lin
 wget "${NDK_URL}" -O "${ANDROID_NDK_ROOT}/ndk.zip"
 unzip -d "${ANDROID_NDK_ROOT}" "${ANDROID_NDK_ROOT}/ndk.zip"
 rm "${ANDROID_NDK_ROOT}/ndk.zip"
+# Initialize sdkmanager and accept licenses
+yes | ${ANDROID_SDK_ROOT}/tools/bin/sdkmanager --licenses
+
+# Install SDK packages required by Qt for Android development
+# Note: Specify exact versions or latest available
+${ANDROID_SDK_ROOT}/tools/bin/sdkmanager "platforms;android-29" "build-tools;29.0.3" "platform-tools"
+
 # Move the content up and remove the versioned directory
 mv "${ANDROID_NDK_ROOT}/android-ndk-${NDK_VERSION}"/* "${ANDROID_NDK_ROOT}/"
 rm -rf "${ANDROID_NDK_ROOT}/android-ndk-${NDK_VERSION}"
@@ -52,12 +59,6 @@ echo "export ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" >> ~/.bashrc
 echo "export ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT}" >> ~/.bashrc
 echo "export PATH=\${PATH}:${ANDROID_SDK_ROOT}/tools/bin:${ANDROID_NDK_ROOT}" >> ~/.bashrc
 
-# Initialize sdkmanager and accept licenses
-yes | ${ANDROID_SDK_ROOT}/tools/bin/sdkmanager --licenses
-
-# Install SDK packages required by Qt for Android development
-# Note: Specify exact versions or latest available
-${ANDROID_SDK_ROOT}/tools/bin/sdkmanager "platforms;android-29" "build-tools;29.0.3" "platform-tools"
 
 echo "Android SDK and NDK installation completed."
 cd

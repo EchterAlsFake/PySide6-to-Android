@@ -2,7 +2,7 @@
 > [!NOTE]
 > DISCLAIMER: This guide is unofficial and not affiliated with Qt. Please refer to the Official Documentation about the compiling process for Android.
 
-[Taking Qt for Python to Android](#https://www.qt.io/blog/taking-qt-for-python-to-android)
+[Taking Qt for Python to Android](https://www.qt.io/blog/taking-qt-for-python-to-android)
 
 
 # Building the Qt for Python Wheels

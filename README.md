@@ -125,12 +125,22 @@ branch and not in the latest stable release. This is why we need to use the deve
 
 ### Other Stuff (Important)
 
+#### pysidedeploy.spec
+
+The `pysidedeploy.spec` file is used to define your Application name, the architecture and some other things.
+The `pysidedeploy.spec` file is created when you build your first .apk. You can use this file by doing:
+
+`pyside6-android-deploy -c pysidedeploy.spec` This makes the process easier. 
+
+#### External Libraries
 If your App needs external libraries like requests or colorama, you need to list them in the 
 `requirements` line (in the buildozer.spec). Just separate them with a comma.
 You can specify exact version numbers like with pip and also install from git using `git+....`
 
+#### App Icon
 If you want to use your own App Icon you can do:
-icon.filename = <path_to_your_app_icon_png>
+<br>
+`icon.filename = <path_to_your_app_icon_png>`
 
 # Debugging / Error finding
 

@@ -21,6 +21,14 @@ mv "${ANDROID_SDK_ROOT}/cmdline-tools-temp/cmdline-tools/"* "${ANDROID_SDK_ROOT}
 # Fix for the non-empty temporary directory issue
 rm -rf "${ANDROID_SDK_ROOT}/cmdline-tools-temp"
 
+# Create the 'tools' directory and clear its contents if it exists
+mkdir -p "${ANDROID_SDK_ROOT}/tools"
+rm -rf "${ANDROID_SDK_ROOT}/tools/"*
+
+# Move the cmdline-tools content to the 'tools' directory
+mv "${ANDROID_SDK_ROOT}/cmdline-tools/latest/"* "${ANDROID_SDK_ROOT}/tools/"
+rm -rf "${ANDROID_SDK_ROOT}/cmdline-tools/latest" # Optionally remove the now empty directory
+
 # Download and extract Android NDK
 NDK_VERSION="r26b" # Corrected NDK version
 NDK_URL="https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip"
@@ -37,19 +45,19 @@ ANDROID_NDK_ROOT="${ANDROID_NDK_ROOT}/" # Already correctly set
 # Set environment variables
 export ANDROID_SDK_ROOT
 export ANDROID_NDK_ROOT
-export PATH="${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_ROOT}"
+export PATH="${PATH}:${ANDROID_SDK_ROOT}/tools/bin:${ANDROID_NDK_ROOT}"
 
 # Optional: Add environment variables to your .bashrc or .bash_profile
 echo "export ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" >> ~/.bashrc
 echo "export ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT}" >> ~/.bashrc
-echo "export PATH=\${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_ROOT}" >> ~/.bashrc
+echo "export PATH=\${PATH}:${ANDROID_SDK_ROOT}/tools/bin:${ANDROID_NDK_ROOT}" >> ~/.bashrc
 
 # Initialize sdkmanager and accept licenses
-yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
+yes | ${ANDROID_SDK_ROOT}/tools/bin/sdkmanager --licenses
 
 # Install SDK packages required by Qt for Android development
 # Note: Specify exact versions or latest available
-${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platforms;android-29" "build-tools;29.0.3" "platform-tools"
+${ANDROID_SDK_ROOT}/tools/bin/sdkmanager "platforms;android-29" "build-tools;29.0.3" "platform-tools"
 
 echo "Android SDK and NDK installation completed."
 cd

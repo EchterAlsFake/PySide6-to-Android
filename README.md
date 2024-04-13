@@ -28,14 +28,12 @@ This guide outlines a method to use PySide6 for Android development. It is impor
 ## Requirements
 - Operating System: Arch Linux
 - Qt Version: 6.6.3 (In the Qt unified installer check the options for "Android" and "Desktop" Development
+- Python 3.11 (Or Python3.10) with OpenSSL
+
 
 ## Basic Knowledge / Understanding
-
 What we are doing here is to build PySide6 and Shiboken6 for the different Android architectures.
-Basically, Qt relies on some C code, which is why we need to build it in this exceptional way. You can't just
-specify PySide6 in the buildozer requirements and expect everything to work. This is why we are doing all this here.
-At the end of compiling, you will have two .whl files for PySide6 and Shiboken6. For every architecture two pieces.
-
+Basically, Qt relies on C / C++ code, which is why we need to build it in this exceptional way.
 There are multiple Android architectures:
 
 - aarch64
@@ -43,8 +41,7 @@ There are multiple Android architectures:
 - x86_64
 - armv7a
 
-What you want to build first is aarch64 as this is where most devices run.
-
+We are going to build it for every architecture and your users then need to install the .apk for their architecture.
 ### Qt Requirements
 
 
@@ -58,10 +55,10 @@ What you want to build first is aarch64 as this is where most devices run.
    export LLVM_INSTALL_DIR=$PWD/libclang
    git clone https://code.qt.io/pyside/pyside-setup
    cd pyside-setup
-   git checkout 6.6.3.1
+   git checkout 6.7.0
    pip install -r requirements.txt
    pip install –r tools/cross_compile_android/requirements.txt
-   pip install pyside6
+   pip install PySide6
    cd
    ```
 2. Install additional development tools and Android-specific packages:
@@ -69,6 +66,16 @@ What you want to build first is aarch64 as this is where most devices run.
    sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake
    ```
 
+# PySide6 modification (Important)
+
+We need to modify the PySide6 build script to fix some things. Don't worry it's easy.
+
+1) Go into your virtual environment to the PySide6 folder (e.g: venv/lib/python3.11/site-packages/PySide6/scripts/)
+2) Edit the `android_deploy.py` file.
+3) Search for the line: `logging.info("[DEPLOY] Running buildozer deployment")`
+4) Above this line write this: `input("Modify your buildozer.spec now")`
+
+Done :)
 
 ### Android SDK and NDK
 3. Automate the SDK and NDK setup by creating and executing a bash script.
@@ -82,25 +89,37 @@ Just use this script and you won't have errors.
 
 # Set the location where you want to install the SDK and NDK
 ANDROID_SDK_ROOT="${HOME}/Android/Sdk"
-ANDROID_NDK_ROOT="${ANDROID_SDK_ROOT}/ndk/25c"
+ANDROID_NDK_ROOT="${ANDROID_SDK_ROOT}/ndk/26b" # Simplified for corrected structure
 
 # Create directories
 mkdir -p "${ANDROID_SDK_ROOT}"
 mkdir -p "${ANDROID_NDK_ROOT}"
 
 # Download and unzip Android SDK command line tools
-# Check for the latest version link at https://developer.android.com/studio
-SDK_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip"
-wget -q "${SDK_TOOLS_URL}" -O "${ANDROID_SDK_ROOT}/cmdline-tools.zip"
-unzip -q -d "${ANDROID_SDK_ROOT}/cmdline-tools" "${ANDROID_SDK_ROOT}/cmdline-tools.zip"
+CMDLINE_TOOLS_VERSION="11076708_latest" # Ensure this matches the latest version
+SDK_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_VERSION}.zip"
+wget "${SDK_TOOLS_URL}" -O "${ANDROID_SDK_ROOT}/cmdline-tools.zip"
+unzip -d "${ANDROID_SDK_ROOT}/cmdline-tools-temp" "${ANDROID_SDK_ROOT}/cmdline-tools.zip"
 rm "${ANDROID_SDK_ROOT}/cmdline-tools.zip"
 
+# Properly setup cmdline-tools directory according to the latest structure required by SDK Manager
+mkdir -p "${ANDROID_SDK_ROOT}/cmdline-tools/latest"
+mv "${ANDROID_SDK_ROOT}/cmdline-tools-temp/cmdline-tools/"* "${ANDROID_SDK_ROOT}/cmdline-tools/latest"
+# Fix for the non-empty temporary directory issue
+rm -rf "${ANDROID_SDK_ROOT}/cmdline-tools-temp"
+
 # Download and extract Android NDK
-NDK_URL="https://dl.google.com/android/repository/android-ndk-r25c-linux.zip"
-wget -q "${NDK_URL}" -O "${ANDROID_SDK_ROOT}/ndk-r25c.zip"
-unzip -q -d "${ANDROID_SDK_ROOT}" "${ANDROID_SDK_ROOT}/ndk-r25c.zip"
-rm "${ANDROID_SDK_ROOT}/ndk-r25c.zip"
-mv "${ANDROID_SDK_ROOT}/android-ndk-r25c" "${ANDROID_NDK_ROOT}"
+NDK_VERSION="r26b" # Corrected NDK version
+NDK_URL="https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip"
+wget "${NDK_URL}" -O "${ANDROID_NDK_ROOT}/ndk.zip"
+unzip -d "${ANDROID_NDK_ROOT}" "${ANDROID_NDK_ROOT}/ndk.zip"
+rm "${ANDROID_NDK_ROOT}/ndk.zip"
+# Move the content up and remove the versioned directory
+mv "${ANDROID_NDK_ROOT}/android-ndk-${NDK_VERSION}"/* "${ANDROID_NDK_ROOT}/"
+rm -rf "${ANDROID_NDK_ROOT}/android-ndk-${NDK_VERSION}"
+
+# Update ANDROID_NDK_ROOT to point directly to the NDK directory
+ANDROID_NDK_ROOT="${ANDROID_NDK_ROOT}/" # Already correctly set
 
 # Set environment variables
 export ANDROID_SDK_ROOT
@@ -111,15 +130,13 @@ export PATH="${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_
 echo "export ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" >> ~/.bashrc
 echo "export ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT}" >> ~/.bashrc
 echo "export PATH=\${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_NDK_ROOT}" >> ~/.bashrc
-cd ~/Android/Sdk/ndk/25c/android-ndk-r25c/
-cp -r * ../
-cd ~/Android/Sdk
-mkdir tools
-cd ~/Android/Sdk/cmdline-tools/cmdline-tools/
-cp -r * ../../tools/
-cd ~/Android/Sdk/cmdline-tools/cmdline-tools/bin/
-./sdkmanager "platforms;android-29"
 
+# Initialize sdkmanager and accept licenses
+yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
+
+# Install SDK packages required by Qt for Android development
+# Note: Specify exact versions or latest available
+${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platforms;android-29" "build-tools;29.0.3" "platform-tools"
 
 echo "Android SDK and NDK installation completed."
 cd
@@ -130,7 +147,6 @@ cd
 > [!IMPORTANT]
 > Your app must be named "main.py" this is a requirement from Python for Android
 > Your PySide and Shiboken version needs to match the Qt version you used for compiling.
-> If you've used Qt 6.6.3 you need to use PySide6==6.6.3 :)
 
 Execute the following commands in the PySide-setup folder:
    ```
@@ -139,10 +155,22 @@ Execute the following commands in the PySide-setup folder:
    Now if this did run successfully, you should have the .whl files for every architecture in the "dist" folder.
    You can now ALWAYS reuse them for all your projects. You don't need to build them again.
 
+
+
 # Building the APK
    The wheels are in pyside-setup/dist/
     
-   ```pyside6-android-deploy --wheel-pyside=<your .whl file for the architecture> --wheel-shiboken=<your .whl file for your architecture> --name=main --ndk-path ~/Android/Sdk/ndk/25c/ --sdk-path ~/Android/Sdk/```
+   ```pyside6-android-deploy --wheel-pyside=<your .whl file for the architecture> --wheel-shiboken=<your .whl file for your architecture> --name=main --ndk-path ~/Android/Sdk/ndk/26b/ --sdk-path ~/Android/Sdk/```
+   
+> [!IMPORTANT]
+> If you have followed the PySide6 modification listed above, you should see the line "Modify your buildozer.spec now"
+
+Open The `buildozer.spec` file and write this line into it:
+
+`p4a.branch = develop`
+
+If you don't do this, it won't work!
+
    <br>After successful execution, you will find the APK in your test folder.
 
 ## Including External Libraries

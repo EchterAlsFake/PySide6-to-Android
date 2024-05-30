@@ -56,8 +56,8 @@ yes | ${ANDROID_SDK_ROOT}/tools/bin/sdkmanager --licenses
 
 # Install SDK packages required by Qt for Android development
 # Note: Specify exact versions or latest available
-${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platforms;android-29" "build-tools;29.0.3" "platform-tools"
-${ANDROID_SDK_ROOT}/tools/bin/sdkmanager "platforms;android-29" "build-tools;29.0.3" "platform-tools"
+${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+${ANDROID_SDK_ROOT}/tools/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
 
 echo "Android SDK and NDK installation completed."
 cd

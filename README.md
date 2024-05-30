@@ -72,7 +72,7 @@ wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-rele
 export LLVM_INSTALL_DIR=$PWD/libclang
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup
-git checkout 6.7.0
+git checkout 6.7.1
 pip install -r requirements.txt
 pip install -r tools/cross_compile_android/requirements.txt
 pip install pyside6
@@ -105,7 +105,7 @@ Quick Information: You only need to build the wheels once, and you can use them 
 
 The basic command for building the wheels is the following:
 
-`python tools/cross_compile_android/main.py --plat-name=--ndk-path=$ANDROID_NDK_ROOT --qt-install-path= --sdk-path=$ANDROID_SDK_ROOT --api-level 29`
+`python tools/cross_compile_android/main.py --plat-name=--ndk-path=$ANDROID_NDK_ROOT --qt-install-path= --sdk-path=$ANDROID_SDK_ROOT --api-level 34`
 
 --plat-name = Here comes your Android architecture. e.g, aarch64 or armv7a
 <br>--qt-install-path = Here comes your Qt installation path. e.g, "/home/$USER/Qt/6.7.0/" or "/opt/Qt/6.7.0"

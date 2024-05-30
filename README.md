@@ -7,9 +7,11 @@
 
 # Building the Qt for Python Wheels
 > [!IMPORTANT]
-> You can use the pre-compiled Wheels in the Repository's release. If they don't work, you need to compile them:
+> You can use the pre-compiled Wheels in the Repository's release. If they don't work, you need to compile them
 
-If you want to use the pre-compiled wheels go over [here](https://github.com/EchterAlsFake/PySide6-to-android/releases/)
+### Current Release: 6.7.1
+- Python3.11: [Qt 6.7.1](https://github.com/EchterAlsFake/PySide6-to-Android/releases/tag/6.7.1_3.11)
+
 And skip the guide to: [Android NDK / SDK](#android-sdk--ndk)
 
 ## Installing Qt
@@ -33,17 +35,33 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm 
 
 
 ```bash
-wget "https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tar.xz"
-tar -xvf Python-3.10.13.tar.xz
-cd Python-3.10.13
+wget "https://www.python.org/ftp/python/3.10.14/Python-3.10.14.tar.xz"
+tar -xvf Python-3.10.14.tar.xz
+cd Python-3.10.14
 ./configure --enable-optimizations --enable-shared # We explicitly need shared libraries!
 make -j 8 # You can set this higher if you have a good CPU
 sudo make altinstall # ALTINSTALL not INSTALL, otherwise will break your Linux
 cd
+
+export_statement='export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH'
+
+if [ -f ~/.bashrc ]; then
+    echo "$export_statement" >> ~/.bashrc
+    echo "Appended to ~/.bashrc"
+else
+    echo "~/.bashrc not found"
+fi
+
+if [ -f ~/.zshrc ]; then
+    echo "$export_statement" >> ~/.zshrc
+    echo "Appended to ~/.zshrc"
+else
+    echo "~/.zshrc not found"
+fi
 ```
 
 > [!IMPORTANT]
-> Whenever you are in a new terminal session or getting an error while trying to use Python3.10 execute this:
+> If you get an error from Python3.10 saying something like "failed to load shared library etc..." use this:
 
 `export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH`
 
@@ -108,7 +126,7 @@ The basic command for building the wheels is the following:
 `python tools/cross_compile_android/main.py --plat-name=--ndk-path=$ANDROID_NDK_ROOT --qt-install-path= --sdk-path=$ANDROID_SDK_ROOT --api-level 34`
 
 --plat-name = Here comes your Android architecture. e.g, aarch64 or armv7a
-<br>--qt-install-path = Here comes your Qt installation path. e.g, "/home/$USER/Qt/6.7.0/" or "/opt/Qt/6.7.0"
+<br>--qt-install-path = Here comes your Qt installation path. e.g, "/home/$USER/Qt/6.7.1/" or "/opt/Qt/6.7.1"
 
 Now, execute this command for all 4 Android architectures.
 Your Wheels should be in the `dist` folder at the end.

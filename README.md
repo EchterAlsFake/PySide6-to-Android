@@ -83,7 +83,14 @@ The basic command for building the wheels is the following:
 
 `python tools/cross_compile_android/main.py --plat-name= --qt-install-path= --api-level 34 --verbose`
 
-> [!IMPORTANT]
+> [!NOTE]
+> If you want to save some time when cloning the Cpython repository, modify the main.py script. Search for: `if not cpython_dir.exists():`
+> Under it, you see the Repo.clone_from() call. Add the following argument to it: `depth=1`
+
+This will only clone the latest commits and branch from the Python repository, otherwise you'll clone a lot of unnecessary
+data.
+
+> [!WARNING]
 > DO NOT REMOVE THE `--verbose` flag! The installer redirects all output from the SDK / NDK installation to the logs.
 > Android will prompt you to accept the license, and you need to type `y` and proceed. If you don't use the --verbose line, 
 > you simply won't see this and the script is stuck forever!

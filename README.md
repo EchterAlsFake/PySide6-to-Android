@@ -46,6 +46,16 @@ and REMEMBER where you've cloned this to, as we need this later :)
 python -m venv venv # Needed, trust me...
 source venv/bin/activate
 git clone https://code.qt.io/pyside/pyside-setup
+wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
+7z x libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
+export LLVM_INSTALL_DIR=$PWD/libclang
+
+if [ -n "$ZSH_VERSION" ]; then
+    echo "export LLVM_INSTALL_DIR=$PWD/libclang" >> ~/.zshrc
+elif [ -n "$BASH_VERSION" ]; then
+    echo "export LLVM_INSTALL_DIR=$PWD/libclang" >> ~/.bashrc
+fi
+
 cd pyside-setup
 git checkout 6.7.2
 pip install -r requirements.txt

@@ -50,7 +50,7 @@ And here are the links for every release:
 > [!NOTE]
 > Only the `aarch64` and `x86_64` versions are available at the moment.
 
-I also compile my own wheels, which you can download in the release repository, although
+I also compile my own wheels, which you can download in the [GitHub releases](https://github.com/EchterAlsFake/PySide6-to-Android/releases/tag/6.8.0_3.11), although
 there's no guarantee for them to work!
 
 - [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.0-6.8.0-cp311-cp311-android_aarch64.whl)
@@ -338,7 +338,7 @@ data.
 > you simply won't see this and the script is stuck forever!
 
 --plat-name = Here comes your Android architecture. e.g, aarch64 or armv7a
-<br>--qt-install-path = Here comes your Qt installation path. e.g, "/home/$USER/Qt/6.7.2/" or "/opt/Qt/6.7.2"
+<br>--qt-install-path = Here comes your Qt installation path. e.g, "/home/$USER/Qt/6.8.0" or "/opt/Qt/6.8.0"
 <br>--api-level = Here comes your target android API level. I recommend 34.
 Now, execute this command for all 4 Android architectures.
 Your Wheels should be in the `dist` folder at the end.

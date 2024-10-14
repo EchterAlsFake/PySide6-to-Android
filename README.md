@@ -80,7 +80,6 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm 
 cd ~/
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup 
-git checkout 6.8.0
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -264,8 +263,6 @@ I appreciate every star on this repo, as it shows me that my work is useful for 
 sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake wget p7zip git
 ```
 
-#### Ubuntu (Untested)
-
 ## Python3.10 Support
 > [!NOTE]
 > If you want to compile your App using Python3.10 you need to install Python3.10 with shared libraries. 
@@ -293,7 +290,6 @@ elif [ -n "$BASH_VERSION" ]; then
 fi
 
 cd pyside-setup
-git checkout 6.8.0
 pip install -r requirements.txt
 pip install -r tools/cross_compile_android/requirements.txt
 pip install pyside6

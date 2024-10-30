@@ -22,6 +22,7 @@
   - C-Compiler can not create executables
   - python package architecture mismatch
   - DeadObjectException
+  - Module not found error
 - [Building the Wheels (LEGACY)](#legacy-building-the-wheels)
   - [Install dependencies](#install-dependencies)
   - [PySide-Setup](#pyside-setup)
@@ -228,8 +229,17 @@ being available. If you are sure that this is not the case, I would suggest you 
 test application which just shows a window and a test label, and you try to import one package by one
 until it breaks.
 
+- No module named <your_module>
+Sometimes it's not enough to just specify the module name. For example, if you want to use
+`httpx` you also need to list `httpx`, `httpcore`,`idna`, `certifi`, `h11`, `sniffio` in the 
+requirements, until it works.
+
+Whenever you get such an error, I recommend you to look into the module and its dependencies and include all
+the dependencies and the dependencies of the dependencies. It will be some trial and error, but
+once you have got it working, it will be clear.
+
 > [!IMPORTANT]
-> I AGAIN want to remind you of using the Java version 17! Java 11 is supported by Gradle and even recommended, but not
+> I AGAIN want to remind you of using Java version 17! Java 11 is supported by Gradle and even recommended, but not
 > supported by Qt, and version 21 is supported by Qt, but not by the currently used Gradle version. This may change in the
 > future and I will update it accordingly.
 

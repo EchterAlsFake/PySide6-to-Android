@@ -36,7 +36,7 @@
 
 Android devices can have one of the four architectures: `armv7`, `aarch64`, `x86_64`, `i686`.
 You should compile your application for all four of these. This involves using the official `pyside6-android-deploy`
-tool, which will automatically sets everything up. 
+tool, which will automatically set everything up. 
 
 ## Downloading the Android wheels
 

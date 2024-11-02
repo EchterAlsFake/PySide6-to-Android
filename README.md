@@ -5,6 +5,11 @@
 [Taking Qt for Python to Android](https://www.qt.io/blog/taking-qt-for-python-to-android)
 <br>[Qt for Python v6.8](https://www.qt.io/blog/qt-for-python-release-6.8)
 
+> [!IMPORTANT]
+> Compiling PySide6 to Android is a very hard topic. To take yourself away from some pain, read the `WHOLE` guide
+> in all of its details, because I already went through a lot of pain and took some notes for you :) 
+
+
 ## **This Guide is up to date with version:**
 
 `PySide6 == 6.8.0`
@@ -23,6 +28,7 @@
   - python package architecture mismatch
   - DeadObjectException
   - Module not found error
+- [DEBUGGING ::: IMPORTANT ::: ](#debugging)
 - [Building the Wheels (LEGACY)](#legacy-building-the-wheels)
   - [Install dependencies](#install-dependencies)
   - [PySide-Setup](#pyside-setup)
@@ -224,11 +230,13 @@ says the C compiler wouldn't be able to create executables and then look inside 
 building the recipes lmao
 
 - DeadObjectException (Couldn't insert ... into...) 
-<br>Solution: Could be anything. but possibly one of your imported packages has an issue such as not
-being available. If you are sure that this is not the case, I would suggest you to make a basic
-test application which just shows a window and a test label, and you try to import one package by one
-until it breaks.
+If you see this, you can make yourself some coffee, turn on UK-Drill and try to find the error the next
+few months :) This error can be literally anything but most of the time it's because you are trying to access
+a resource that doesn't exist. In my case it was a `logging.debug` function which made the whole application
+crash, because I couldn't access the `log.log` file for some reason. So, if you see the DeadObjectException I recommend
+you `STRONGLY` to go to [Debugging](#debugging) to find and fix the issue.
 
+  
 - No module named <your_module>
 Sometimes it's not enough to just specify the module name. For example, if you want to use
 `httpx` you also need to list `httpx`, `httpcore`,`idna`, `certifi`, `h11`, `sniffio` in the 
@@ -237,6 +245,74 @@ requirements, until it works.
 Whenever you get such an error, I recommend you to look into the module and its dependencies and include all
 the dependencies and the dependencies of the dependencies. It will be some trial and error, but
 once you have got it working, it will be clear.
+
+
+
+# DEBUGGING
+
+> [!IMPORTANT]
+> THIS SECTION IS VERY IMPORTANT
+
+Your App **WILL CRASH** on it's first run (except if you are god), so what you do is:
+
+Write this into your Python application:
+
+```python
+import http.client
+import json
+
+def send_error_log(message):
+    url = "<your_pc's_ip>:8000" # Don't forget to place the IP of the device your server runs on
+    endpoint = "/error-log/"
+    data = json.dumps({"message": message})
+    headers = {"Content-type": "application/json"}
+
+    conn = http.client.HTTPConnection(url)
+
+    conn.request("POST", endpoint, data, headers)
+```
+
+This function does not need any dependencies and will 100% work no matter what's wrong with your App. You place
+it on top of your function, and then you always use the `send_error_log()` call with your message.
+For example, you have different functions in your app, and it crashes you log every new line in your Python application
+until you can see where it exactly crashed. I know it's a lot of pain, but this is your only option to find the error!
+
+**Server Code**
+
+```python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+
+class ErrorLog(BaseModel):
+    message: str
+
+
+app = FastAPI()
+
+
+@app.post("/error-log/")
+def receive_error_log(error_log: ErrorLog):
+    print(f"Received error: {error_log.message}")
+    return {"detail": "Error log received"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+Run this on your PC or Phone, and it will receive the error logs from your Android Application
+<br>Requirements: `pip install pydantic fastapi uvicorn`
+
+
+
+
+
+
+
+
+
 
 > [!IMPORTANT]
 > I AGAIN want to remind you of using Java version 17! Java 11 is supported by Gradle and even recommended, but not

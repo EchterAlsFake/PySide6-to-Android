@@ -12,7 +12,7 @@
 
 ## **This Guide is up to date with version:**
 
-`PySide6 == 6.8.0`
+`PySide6 == 6.8.1`
 
 ## Table of contents
 - [General](#a-general-explanation)
@@ -60,6 +60,11 @@ And here are the links for every release:
 I also compile my own wheels, which you can download in the [GitHub releases](https://github.com/EchterAlsFake/PySide6-to-Android/releases/tag/6.8.0_3.11), although
 there's no guarantee for them to work!
 
+> [!WARNING]
+> As of 5th of December 2024, Qt has not yet published their wheels for Pyside 6.8.1. I will update the links as soon as 
+> possible. If you don't want to build them by yourself, you can download them from my releases, because I already compiled
+> them for 6.8.1 :)
+
 - [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.0-6.8.0-cp311-cp311-android_aarch64.whl)
 - ~~[PySide6 - armv7]()~~
 - ~~[PySide6 - i686]()~~
@@ -87,19 +92,20 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm 
 cd ~/
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup 
+git checkout 6.8.1 # You can also use dev branch, but could cause errors
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 pip install -r tools/cross_compile_android/requirements.txt
-python tools/cross_compile_android/main.py --download-only --verbose
+python tools/cross_compile_android/main.py --download-only --auto-accept-license
 ```
 
 > [!IMPORTANT]
-> Make sure to use the --verbose flag, otherwise it won't show you the License Agreement for the SDK
-> and you won't be able to install the build tools.
+> Make sure to use `auto-accept-license` flag to automatically accept the license. If you don't want to do this, and you want
+> to manually view the license, you need to set the `--verbose` flag, otherwise the License Agreement won't be shown to you.
 
 
-After you are finished with this your Android SDK and NDK are in the following directories:
+After you are finished with it, your Android SDK and NDK are in the following directories:
 
 Android SDK: `~/.pyside6_android_deploy/android-sdk`
 <br>Android NDK:   `~/.pyside6_android_deploy/android-ndk/android-ndk-r26b/`
@@ -111,9 +117,9 @@ Android SDK: `~/.pyside6_android_deploy/android-sdk`
 > Although you do not need this for a base PySide6 application, I still recommend you to 
 > read through the following part, because it contains very important things for your Android App.
 
-Buildozer is the tool which generates the .apk file using P4A (Python for Android) as backend.
-The buildozer.spec file is a configuration file which is generated on Buildozer's first run.
-It's used to configure the behaviour of your application. For example whether your App should
+Buildozer is the tool, which generates the .apk file using P4A (Python for Android) as backend.
+The buildozer.spec file is a configuration file, which is generated on Buildozer's first run.
+It's used to configure the behavior of your application. For example, whether your App should
 run in portrait or landscape mode and other things. Here's a list of the most important options:
 
 - `requirements`: The list of all python packages used in your app See [Buildozer.spec](#the-buildozerspec-file)
@@ -136,15 +142,15 @@ Unfortunately the `pyside6-android-deploy` script starts the build proces immedi
 you the option to manually review the buildozer.spec file, which is the reason why we need to do
 a little modification, but don't worry it's easy:
 
-1) Go into your virtual environment to the PySide6 folder (e.g: venv/lib/python3.11/site-packages/PySide6/scripts/)
+1) Go into your virtual environment to the PySide6 folder (e.g.: venv/lib/python3.11/site-packages/PySide6/scripts/)
 2) Edit the `android_deploy.py` file.
 3) Search for the line: `logging.info("[DEPLOY] Running buildozer deployment")`
 4) Above this line write this: `input("Modify your buildozer.spec now")`
 
 
 When you start building the apk with `pyside6-android-deploy` the build process will stop at some point,
-and then you can make adjustments to the `buildozer.spec` file. After you are done, just press enter
-the build process, and it will go on using your own options in the requirements.
+and then you can make adjustments to the `buildozer.spec` file. After you are done, press enter, and it will 
+go on using your own options in the requirements.
 
 # The final build process
 > [!IMPORTANT]
@@ -152,34 +158,34 @@ the build process, and it will go on using your own options in the requirements.
 
 Go into your source directory and type the following:
 
-`pyside6-android-deploy --wheel-pyside=<your .whl file for the architecture> --wheel-shiboken=<your .whl file for your architecture> --name=main --ndk-path ~/.pyside6_android_deploy/android-ndk/android-ndk-r26b --sdk-path ~/.pyside6_android_deploy/android-sdk/
+`pyside6-android-deploy --wheel-pyside=<your .whl file for the architecture> --wheel-shiboken=<your .whl file for your architecture> --name=main --ndk-path ~/.pyside6_android_deploy/android-ndk/android-ndk-r26b --sdk-path ~/.pyside6_android_deploy/android-sdk/`
 
 #### Explanation:
-- --wheel-pyside= Here comes your PySide6 wheel which you've downloaded or compiled
-- --wheel-shiboken= Here comes your Shiboken wheel which you've downloaded or compiled
+- --wheel-pyside= Here comes your PySide6 wheel, which you've downloaded or compiled
+- --wheel-shiboken= Here comes your Shiboken wheel, which you've downloaded or compiled
 - --name= The name of your application
 - --ndk-path= The path to your Android NDK (See [Setup](#setup))
 - --sdk-path= The path to your Android SDK (See [Setup](#setup))
 
 
 The script will start configuring buildozer and buildozer will start the build process. 
-At the end you will have a .apk file for the specified Android architecture.
+In the end, you will have a .apk file for the specified Android architecture.
 
 ### Installation (Best practices)
 
-I generally recommend you to use ADB / Fastboot to install, and debug your Android application.
-Once you understood how it works, it makes your life a lot easier...
+I generally recommend you to use ADB / Fastboot to install and debug your Android application.
+Once you understand how it works, it makes your life a lot easier...
 
 1. Go into your system information and tap a few times on your build number
 2. Go (or search) into the developer settings
 3. Enable USB-Debugging (Or Debugging over W-Lan, but this is a little bit advanced)
-4. Install the android-tools on your system:
+4. Install the android tools on your system:
     - On Arch Linux: `sudo pacman -S android-tools`
     - On Ubuntu: `sudo apt install android-tools-adb android-tools-fastboot`
     - On Windows: `Imagine using Windows lol`
 
 5. Type: `adb devices`
-6. On your device there should be a popup asking for your permission. Click on confirm.
+6. On your device, there should be a popup asking for your permission. Click on confirm.
 7. Type: `adb devices` once again and confirm, that you see your device there.
 
 The two magical commands
@@ -188,14 +194,14 @@ Install your apk: `adb install <path_to_apk_file>`
 <br>Debug your app: `adb logcat --regex "<package.domain>`
 
 After your apk was installed, you will see it in your system apps. Click on your app, 
-scroll down and at the very last line it should say something like:
+scroll down, and at the very last line it should say something like:
 
 ```
 Version 2.1.6
 com.digibites.accubattery
 ```
 
-The first line is your App version and the second line is your package domain.
+The first line is your App version, and the second line is your package domain.
 <br>After executing the logcat command, you can start your App and you should see a lot
 of debug messages. In case your app crashes, you can see what went wrong, although the crash
 report isn't always very helpful...
@@ -231,7 +237,7 @@ building the recipes lmao
 
 - DeadObjectException (Couldn't insert ... into...) 
 If you see this, you can make yourself some coffee, turn on UK-Drill and try to find the error the next
-few months :) This error can be literally anything but most of the time it's because you are trying to access
+few months :) This error can be literally anything, but most of the time it's because you are trying to access
 a resource that doesn't exist. In my case it was a `logging.debug` function which made the whole application
 crash, because I couldn't access the `log.log` file for some reason. So, if you see the DeadObjectException I recommend
 you `STRONGLY` to go to [Debugging](#debugging) to find and fix the issue.
@@ -253,7 +259,7 @@ once you have got it working, it will be clear.
 > [!IMPORTANT]
 > THIS SECTION IS VERY IMPORTANT
 
-Your App **WILL CRASH** on it's first run (except if you are god), so what you do is:
+Your App **WILL CRASH** on its first run (except if you are a god), so what you do is:
 
 Write this into your Python application:
 
@@ -272,7 +278,7 @@ def send_error_log(message):
     conn.request("POST", endpoint, data, headers)
 ```
 
-This function does not need any dependencies and will 100% work no matter what's wrong with your App. You place
+This function does not need any dependencies, and will 100% work no matter what's wrong with your App. You place
 it on top of your function, and then you always use the `send_error_log()` call with your message.
 For example, you have different functions in your app, and it crashes you log every new line in your Python application
 until you can see where it exactly crashed. I know it's a lot of pain, but this is your only option to find the error!
@@ -305,15 +311,6 @@ if __name__ == "__main__":
 Run this on your PC or Phone, and it will receive the error logs from your Android Application
 <br>Requirements: `pip install pydantic fastapi uvicorn`
 
-
-
-
-
-
-
-
-
-
 > [!IMPORTANT]
 > I AGAIN want to remind you of using Java version 17! Java 11 is supported by Gradle and even recommended, but not
 > supported by Qt, and version 21 is supported by Qt, but not by the currently used Gradle version. This may change in the
@@ -332,7 +329,7 @@ I appreciate every star on this repo, as it shows me that my work is useful for 
 # Legacy (Building the wheels)
 
 > [!NOTE]
-> Please note, that this won't be maintained as often and that the following part is NOT perfect
+> Please note that this won't be maintained as often and that the following part is NOT perfect
 > and may contain some issues. This is made to get you into the right direction, but shouldn't be 
 > seen as a perfect tutorial or guide!
 
@@ -376,6 +373,7 @@ elif [ -n "$BASH_VERSION" ]; then
 fi
 
 cd pyside-setup
+git checkout 6.8.1 # You can also use dev branch, but I wouldn't recommend, because it can cause issues
 pip install -r requirements.txt
 pip install -r tools/cross_compile_android/requirements.txt
 pip install pyside6
@@ -409,7 +407,7 @@ Quick Information: You only need to build the wheels once, and you can use them 
 
 The basic command for building the wheels is the following:
 
-`python tools/cross_compile_android/main.py --plat-name= --qt-install-path= --api-level 34 --verbose`
+`python tools/cross_compile_android/main.py --plat-name= --qt-install-path= --api-level 34 --auto-accept-license`
 
 > [!NOTE]
 > If you want to save some time when cloning the Cpython repository, modify the main.py script. Search for: `if not cpython_dir.exists():`
@@ -417,11 +415,6 @@ The basic command for building the wheels is the following:
 
 This will only clone the latest commits and branch from the Python repository, otherwise you'll clone a lot of unnecessary
 data.
-
-> [!WARNING]
-> DO NOT REMOVE THE `--verbose` flag! The installer redirects all output from the SDK / NDK installation to the logs.
-> Android will prompt you to accept the license, and you need to type `y` and proceed. If you don't use the --verbose line, 
-> you simply won't see this and the script is stuck forever!
 
 --plat-name = Here comes your Android architecture. e.g, aarch64 or armv7a
 <br>--qt-install-path = Here comes your Qt installation path. e.g, "/home/$USER/Qt/6.8.0" or "/opt/Qt/6.8.0"

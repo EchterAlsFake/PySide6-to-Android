@@ -12,7 +12,7 @@
 
 ## **This Guide is up to date with version:**
 
-`PySide6 == 6.8.1`
+`PySide6 == 6.8.2`
 
 ## Table of contents
 - [General](#a-general-explanation)
@@ -65,15 +65,15 @@ there's no guarantee for them to work!
 > possible. If you don't want to build them by yourself, you can download them from my releases, because I already compiled
 > them for 6.8.1 :)
 
-- [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.0-6.8.0-cp311-cp311-android_aarch64.whl)
+- [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.2-cp39-abi3-manylinux_2_39_aarch64.whl)
 - ~~[PySide6 - armv7]()~~
 - ~~[PySide6 - i686]()~~
-- [PySide6 - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.0-6.8.0-cp311-cp311-android_x86_64.whl)
+- [PySide6 - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.2-cp39-abi3-manylinux_2_28_x86_64.whl)
 
-- [Shiboken - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/shiboken6-6.8.0-6.8.0-cp311-cp311-android_aarch64.whl)
+- [Shiboken - aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.8.2-6.8.2-cp311-cp311-android_aarch64.whl)
 - ~~[Shiboken - armv7]()~~
 - ~~[Shiboken - i686]()~~
-- [Shiboken - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/shiboken6-6.8.0-6.8.0-cp311-cp311-android_x86_64.whl)
+- [Shiboken - x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.8.2-6.8.2-cp311-cp311-android_x86_64.whl)
 
 # Setup
 When building the .apk you need the Android SDK and NDK. You can install them manually and skip this 
@@ -92,7 +92,7 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm 
 cd ~/
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup 
-git checkout 6.8.1 # You can also use dev branch, but could cause errors
+git checkout 6.8.2 # You can also use dev branch, but could cause errors
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt

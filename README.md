@@ -60,15 +60,10 @@ And here are the links for every release:
 I also compile my own wheels, which you can download in the [GitHub releases](https://github.com/EchterAlsFake/PySide6-to-Android/releases/tag/6.8.0_3.11), although
 there's no guarantee for them to work!
 
-> [!WARNING]
-> As of 5th of December 2024, Qt has not yet published their wheels for Pyside 6.8.1. I will update the links as soon as 
-> possible. If you don't want to build them by yourself, you can download them from my releases, because I already compiled
-> them for 6.8.1 :)
-
-- [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.2-cp39-abi3-manylinux_2_39_aarch64.whl)
+- [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.2-6.8.2-cp311-cp311-android_aarch64.whl)
 - ~~[PySide6 - armv7]()~~
 - ~~[PySide6 - i686]()~~
-- [PySide6 - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.2-cp39-abi3-manylinux_2_28_x86_64.whl)
+- [PySide6 - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.2-6.8.2-cp311-cp311-android_x86_64.whl)
 
 - [Shiboken - aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.8.2-6.8.2-cp311-cp311-android_aarch64.whl)
 - ~~[Shiboken - armv7]()~~

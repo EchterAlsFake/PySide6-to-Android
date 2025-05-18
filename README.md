@@ -12,7 +12,7 @@
 
 ## **This Guide is up to date with version:**
 
-`PySide6 == 6.8.3`
+`PySide6 == 6.9.0`
 
 ## Table of contents
 - [General](#a-general-explanation)
@@ -51,7 +51,7 @@ recommend you to download them, instead of compiling your own.
 
 However, if you want to compile them by yourself, you can skip to the [LEGACY](#legacy-building-the-wheels) part.
 
-Here's the link to their public archive: `https://download.qt.io/official_releases/QtForPython/pyside6/`
+Here's the link to their public archive: `https://download.qt.io/official_releases/QtForPython/`
 
 And here are the links for every release:
 > [!NOTE]
@@ -60,15 +60,15 @@ And here are the links for every release:
 I also compile my own wheels, which you can download in the [GitHub releases](https://github.com/EchterAlsFake/PySide6-to-Android/releases/tag/6.8.0_3.11), although
 there's no guarantee for them to work!
 
-- [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.3-6.8.3-cp311-cp311-android_aarch64.whl)
+- [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.0-6.9.0-cp311-cp311-android_aarch64.whl)
 - ~~[PySide6 - armv7]()~~
 - ~~[PySide6 - i686]()~~
-- [PySide6 - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.3-6.8.3-cp311-cp311-android_x86_64.whl)
+- [PySide6 - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.0-6.9.0-cp311-cp311-android_x86_64.whl)
 
-- [Shiboken - aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.8.3-6.8.3-cp311-cp311-android_aarch64.whl)
+- [Shiboken - aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.9.0-6.9.0-cp311-cp311-android_aarch64.whl)
 - ~~[Shiboken - armv7]()~~
 - ~~[Shiboken - i686]()~~
-- [Shiboken - x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.8.3-6.8.3-cp311-cp311-android_x86_64.whl)
+- [Shiboken - x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.9.0-6.9.0-cp311-cp311-android_x86_64.whl)
 
 # Setup
 When building the .apk you need the Android SDK and NDK. You can install them manually and skip this 
@@ -87,7 +87,7 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm 
 cd ~/
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup 
-git checkout 6.8.3 # You can also use dev branch, but could cause errors
+git checkout 6.9.0 # You can also use dev branch, but could cause errors
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -368,7 +368,7 @@ elif [ -n "$BASH_VERSION" ]; then
 fi
 
 cd pyside-setup
-git checkout 6.8.3 # You can also use dev branch, but I wouldn't recommend, because it can cause issues
+git checkout 6.9.0 # You can also use dev branch, but I wouldn't recommend, because it can cause issues
 pip install -r requirements.txt
 pip install -r tools/cross_compile_android/requirements.txt
 pip install pyside6

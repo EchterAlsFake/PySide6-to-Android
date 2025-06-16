@@ -12,7 +12,7 @@
 
 ## **This Guide is up to date with version:**
 
-`PySide6 == 6.9.0`
+`PySide6 == 6.9.1`
 
 ## Table of contents
 - [General](#a-general-explanation)
@@ -39,7 +39,6 @@
 > Before proceeding, make sure your app is compatible with either `Python3.10.x` or `Python3.11.x`
 
 # A general explanation
-
 Android devices can have one of the four architectures: `armv7`, `aarch64`, `x86_64`, `i686`.
 You should compile your application for all four of these. This involves using the official `pyside6-android-deploy`
 tool, which will automatically set everything up. 
@@ -60,15 +59,15 @@ And here are the links for every release:
 I also compile my own wheels, which you can download in the [GitHub releases](https://github.com/EchterAlsFake/PySide6-to-Android/releases/tag/6.8.0_3.11), although
 there's no guarantee for them to work!
 
-- [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.0-6.9.0-cp311-cp311-android_aarch64.whl)
+- [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.1-6.9.1-cp311-cp311-android_aarch64.whl)
 - ~~[PySide6 - armv7]()~~
 - ~~[PySide6 - i686]()~~
-- [PySide6 - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.0-6.9.0-cp311-cp311-android_x86_64.whl)
+- [PySide6 - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.1-6.9.1-cp311-cp311-android_x86_64.whl)
 
-- [Shiboken - aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.9.0-6.9.0-cp311-cp311-android_aarch64.whl)
+- [Shiboken - aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.9.1-6.9.1-cp311-cp311-android_aarch64.whl)
 - ~~[Shiboken - armv7]()~~
 - ~~[Shiboken - i686]()~~
-- [Shiboken - x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.9.0-6.9.0-cp311-cp311-android_x86_64.whl)
+- [Shiboken - x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.9.1-6.9.1-cp311-cp311-android_x86_64.whl)
 
 # Setup
 When building the .apk you need the Android SDK and NDK. You can install them manually and skip this 
@@ -79,7 +78,7 @@ section, but to make your life a little bit easier, I recommend using Qt's own t
 Although you do not need all of them, I recommend installing them:
 
 ```bash
-sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake wget git
+sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake wget git zip
 ```
 
 
@@ -87,7 +86,7 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm 
 cd ~/
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup 
-git checkout 6.9.0 # You can also use dev branch, but could cause errors
+git checkout 6.9.1 # You can also use dev branch, but could cause errors
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -102,8 +101,8 @@ python tools/cross_compile_android/main.py --download-only --auto-accept-license
 
 After you are finished with it, your Android SDK and NDK are in the following directories:
 
-Android SDK: `~/.pyside6_android_deploy/android-sdk`
-<br>Android NDK:   `~/.pyside6_android_deploy/android-ndk/android-ndk-r26b/`
+Android SDK: `~/.pyside6_android_deploy/android-sdk/`
+<br>Android NDK:   `~/.pyside6_android_deploy/android-ndk/android-ndk-r27c/`
 
 # Building the Android APK
 
@@ -125,6 +124,8 @@ run in portrait or landscape mode and other things. Here's a list of the most im
 - `package.name`: The name of your package, which is the output of buildozer
 - `package.domain`: The unique identifier of your app inside the Android app system
 - `orientation`:  The orientation of your app: `portrait` ->: `||` or `landscape` ->: `===`
+- `android.api`: The target Android API (usually you want to go for the highest here)
+- `android.minapi` The minimum supported Android API (probably something like 21)
 
 #### Special Note on `charset_normalizer` and `requests`:
 If your project uses the 'requests' library or any other library dependent on 'charset_normalizer', ensure to specify 
@@ -167,7 +168,6 @@ The script will start configuring buildozer and buildozer will start the build p
 In the end, you will have a .apk file for the specified Android architecture.
 
 ### Installation (Best practices)
-
 I generally recommend you to use ADB / Fastboot to install and debug your Android application.
 Once you understand how it works, it makes your life a lot easier...
 
@@ -338,7 +338,7 @@ I appreciate every star on this repo, as it shows me that my work is useful for 
 #### Arch Linux (recommended)
 
 ```
-sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake wget p7zip git
+sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake wget p7zip git zip
 ```
 
 ## Python3.10 Support
@@ -368,7 +368,7 @@ elif [ -n "$BASH_VERSION" ]; then
 fi
 
 cd pyside-setup
-git checkout 6.9.0 # You can also use dev branch, but I wouldn't recommend, because it can cause issues
+git checkout 6.9.1 # You can also use dev branch, but I wouldn't recommend, because it can cause issues
 pip install -r requirements.txt
 pip install -r tools/cross_compile_android/requirements.txt
 pip install pyside6
@@ -395,14 +395,14 @@ phone from 11 years ago and a new Android Tablet from 2024 :)
 > (It's line 21)
 
 > [!NOTE]
-> If you want to use a different NDK version than r26b, go into `tools/cross_compile_android/android_utilities.py` and 
+> If you want to use a different NDK version than r27c, go into `tools/cross_compile_android/android_utilities.py` and 
 > change the value in the NDK version to your preferred one (at the top of the script)
 
 Quick Information: You only need to build the wheels once, and you can use them for all your projects. So this is a one time step!
 
 The basic command for building the wheels is the following:
 
-`python tools/cross_compile_android/main.py --plat-name= --qt-install-path= --api-level 34 --auto-accept-license`
+`python tools/cross_compile_android/main.py --plat-name= --qt-install-path= --api-level 35 --auto-accept-license`
 
 > [!NOTE]
 > If you want to save some time when cloning the Cpython repository, modify the main.py script. Search for: `if not cpython_dir.exists():`
@@ -412,8 +412,8 @@ This will only clone the latest commits and branch from the Python repository, o
 data.
 
 --plat-name = Here comes your Android architecture. e.g, aarch64 or armv7a
-<br>--qt-install-path = Here comes your Qt installation path. e.g, "/home/$USER/Qt/6.8.0" or "/opt/Qt/6.8.0"
-<br>--api-level = Here comes your target android API level. I recommend 34.
+<br>--qt-install-path = Here comes your Qt installation path. e.g, "/home/$USER/Qt/6.9.1" or "/opt/Qt/6.9.1"
+<br>--api-level = Here comes your target android API level. I recommend 35.
 Now, execute this command for all 4 Android architectures.
 Your Wheels should be in the `dist` folder at the end.
 

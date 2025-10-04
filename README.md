@@ -1,92 +1,101 @@
-# PySide6 for Android Devices
-> [!NOTE]
-> DISCLAIMER: This guide is unofficial and not affiliated with Qt. Please refer to the Official Documentation about the compiling process for Android.
+# PySide6 on Android — Practical Guide
 
-[Taking Qt for Python to Android](https://www.qt.io/blog/taking-qt-for-python-to-android)
-<br>[Qt for Python v6.8](https://www.qt.io/blog/qt-for-python-release-6.8)
+> [!NOTE]
+> This guide is **unofficial** and not affiliated with Qt. For authoritative details on the Android toolchain and the
+> overall process, see the official documentation and blog posts:
+> - [Taking Qt for Python to Android](https://www.qt.io/blog/taking-qt-for-python-to-android)
+> - [Qt for Python v6.8 announcement](https://www.qt.io/blog/qt-for-python-release-6.8)
 
 > [!IMPORTANT]
-> Compiling PySide6 to Android is a very hard topic. To take yourself away from some pain, read the `WHOLE` guide
-> in all of its details, because I already went through a lot of pain and took some notes for you :) 
+> Building and shipping **PySide6** apps to Android is non‑trivial. Read this guide **end‑to‑end** before you start—
+> the pitfalls are real, and many of them are captured here so you don’t have to rediscover them. 🙂
 
+---
 
-## **This Guide is up to date with version:**
+## Supported Versions
 
-`PySide6 == 6.9.1`
-
-## Table of contents
-- [General](#a-general-explanation)
-- [Downloading the Android wheels](#downloading-the-android-wheels)
-- [Setup](#setup)
-- [Building the Android APK](#building-the-android-apk)
-  - [PySide6 modification](#pyside6-modification)
-  - [The final build process](#the-final-build-process)
-  - [Installation of your App](#installation-best-practices)
-- [Errors and solutions](#errors-and-potential-solutions)
-  - RuntimeError
-  - C-Compiler can not create executables
-  - python package architecture mismatch
-  - DeadObjectException
-  - Module not found error
-- [DEBUGGING ::: IMPORTANT ::: ](#debugging)
-- [Building the Wheels (LEGACY)](#legacy-building-the-wheels)
-  - [Install dependencies](#install-dependencies)
-  - [PySide-Setup](#pyside-setup)
-  - [Building the wheels](#building-the-qt-wheels)
-
+- **PySide6:** `6.9.3` (guide verified against this version)
+- **Python:** `3.11.x` (preferred) or `3.10.x`
 
 > [!WARNING]
-> Before proceeding, make sure your app is compatible with either `Python3.10.x` or `Python3.11.x`
+> Ensure your application is compatible with **Python 3.10 or 3.11**. Other versions are not supported by Qt (on Android)
 
-# A general explanation
-Android devices can have one of the four architectures: `armv7`, `aarch64`, `x86_64`, `i686`.
-You should compile your application for all four of these. This involves using the official `pyside6-android-deploy`
-tool, which will automatically set everything up. 
+---
 
-## Downloading the Android wheels
+## Table of Contents
 
-Since Qt Version `6.8` Qt published their own Android wheels, which you need for building. I **STRONGLY**
-recommend you to download them, instead of compiling your own. 
+- [Overview](#overview)
+- [Get Prebuilt Android Wheels](#get-prebuilt-android-wheels)
+- [Environment Setup (SDK/NDK)](#environment-setup-sdkndk)
+- [Build the APK](#build-the-apk)
+  - [Configure `buildozer.spec`](#configure-buildozerspec)
+  - [Optional: Pause `pyside6-android-deploy` to tweak config](#optional-pause-pyside6-android-deploy-to-tweak-config)
+  - [Run the final build](#run-the-final-build)
+  - [Install & Debug on Device](#install--debug-on-device)
+- [Common Errors & Fixes](#common-errors--fixes)
+- [Debugging Strategy (Highly Recommended)](#debugging-strategy-highly-recommended)
+- [Legacy: Building the Wheels Yourself](#legacy-building-the-wheels-yourself)
+  - [Install Qt](#install-qt)
+  - [Install dependencies](#install-dependencies)
+  - [Prepare `pyside-setup`](#prepare-pyside-setup)
+  - [Build Qt/PySide Wheels](#build-qtpyside-wheels)
+- [Contributing](#contributing)
+- [Support](#support)
 
-However, if you want to compile them by yourself, you can skip to the [LEGACY](#legacy-building-the-wheels) part.
+---
 
-Here's the link to their public archive: `https://download.qt.io/official_releases/QtForPython/`
+## Overview
+Android devices typically use one of four CPU architectures: `armv7`, `aarch64`, `x86_64`, `i686`.  
+To maximize compatibility, you’ll often want to build for multiple architectures. The official
+`pyside6-android-deploy` tool orchestrates most of the process.
 
-And here are the links for every release:
+---
+
+## Get Prebuilt Android Wheels
+Since Qt 6.8, **official Android wheels** are published and are the **recommended** route.
+You’ll save hours of compilation time and avoid a lot of complexity.
+
+- Public archive: `https://download.qt.io/official_releases/QtForPython/`
+
 > [!NOTE]
-> Only the `aarch64` and `x86_64` versions are available at the moment.
+> As of now, official Android wheels are available for **`aarch64`** and **`x86_64`**.
 
-I also compile my own wheels, which you can download in the [GitHub releases](https://github.com/EchterAlsFake/PySide6-to-Android/releases/tag/6.8.0_3.11), although
-there's no guarantee for them to work!
+**Direct links for 6.9.1 (Python 3.11):**
 
-- [PySide6 - aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.1-6.9.1-cp311-cp311-android_aarch64.whl)
-- ~~[PySide6 - armv7]()~~
-- ~~[PySide6 - i686]()~~
-- [PySide6 - x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.1-6.9.1-cp311-cp311-android_x86_64.whl)
+- **PySide6**
+  - [aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.3-6.9.3-cp311-cp311-android_aarch64.whl)
+  - [x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.3-6.9.3-cp311-cp311-android_x86_64.whl)
 
-- [Shiboken - aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.9.1-6.9.1-cp311-cp311-android_aarch64.whl)
-- ~~[Shiboken - armv7]()~~
-- ~~[Shiboken - i686]()~~
-- [Shiboken - x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.9.1-6.9.1-cp311-cp311-android_x86_64.whl)
+- **Shiboken6**
+  - [aarch64]() (NOT AVAILABLE)
+  - [x86_64]()  (NOT AVAILABLE)
 
-# Setup
-When building the .apk you need the Android SDK and NDK. You can install them manually and skip this 
-section, but to make your life a little bit easier, I recommend using Qt's own tool for that purpose.
 
-**Dependencies:**
 
-Although you do not need all of them, I recommend installing them:
+If you prefer building your own wheels, see the [Legacy](#legacy-building-the-wheels-yourself) section below.
+Wheels compiled by myself may also be available on the project’s GitHub Releases page, but use them **at your own risk**.
+
+---
+
+## Environment Setup (SDK/NDK)
+
+To build an APK, you need both the **Android SDK** and **Android NDK**. You can install them manually, but the
+Qt-provided helper is convenient.
+
+### Install base dependencies (example: Arch Linux)
+Although not strictly required, the following set is a good baseline:
 
 ```bash
 sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake wget git zip
 ```
 
+### Fetch SDK & NDK with `pyside-setup` helper
 
 ```bash
 cd ~/
 git clone https://code.qt.io/pyside/pyside-setup
-cd pyside-setup 
-git checkout 6.9.1 # You can also use dev branch, but could cause errors
+cd pyside-setup
+git checkout 6.9.3   # dev branch can work, but is more error-prone
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -95,326 +104,300 @@ python tools/cross_compile_android/main.py --download-only --auto-accept-license
 ```
 
 > [!IMPORTANT]
-> Make sure to use `auto-accept-license` flag to automatically accept the license. If you don't want to do this, and you want
-> to manually view the license, you need to set the `--verbose` flag, otherwise the License Agreement won't be shown to you.
+> If you prefer to review licenses manually, omit `--auto-accept-license` and add `--verbose` so the license text is shown.
 
+After running the script, the tools are placed at:
 
-After you are finished with it, your Android SDK and NDK are in the following directories:
+- **Android SDK:** `~/.pyside6_android_deploy/android-sdk/`
+- **Android NDK:** `~/.pyside6_android_deploy/android-ndk/android-ndk-r27c/`
 
-Android SDK: `~/.pyside6_android_deploy/android-sdk/`
-<br>Android NDK:   `~/.pyside6_android_deploy/android-ndk/android-ndk-r27c/`
+---
 
-# Building the Android APK
+## Build the APK
 
-# The `buildozer.spec` file
+### Configure `buildozer.spec`
+
 > [!NOTE]
-> Although you do not need this for a base PySide6 application, I still recommend you to 
-> read through the following part, because it contains very important things for your Android App.
+> `buildozer` (using **Python‑for‑Android** under the hood) handles packaging. Its `buildozer.spec` file
+> controls app metadata, permissions, dependencies, orientation, and more.
 
-Buildozer is the tool, which generates the .apk file using P4A (Python for Android) as backend.
-The buildozer.spec file is a configuration file, which is generated on Buildozer's first run.
-It's used to configure the behavior of your application. For example, whether your App should
-run in portrait or landscape mode and other things. Here's a list of the most important options:
+Key options you’ll likely touch:
 
-- `requirements`: The list of all python packages used in your app See [Buildozer.spec](#the-buildozerspec-file)
-- `icon.filename`: The Icon of your App as a .png or .jpg. Please have a look at Google's [Adaptive Icons](https://developer.android.com/develop/ui/views/launch/icon_design_adaptive?hl=de)
-- `title`: Your App name
-- `version`: The version of your application e.g, 1.1
-- `android.permissions:` All permissions your App needs. Have a look at [Android Permissions](https://developer.android.com/reference/android/Manifest.permission.html)
-- `package.name`: The name of your package, which is the output of buildozer
-- `package.domain`: The unique identifier of your app inside the Android app system
-- `orientation`:  The orientation of your app: `portrait` ->: `||` or `landscape` ->: `===`
-- `android.api`: The target Android API (usually you want to go for the highest here)
-- `android.minapi` The minimum supported Android API (probably something like 21)
+- `requirements`: Comma‑separated list of Python dependencies your app needs.
+- `icon.filename`: App icon file (`.png` or `.jpg`). See Android’s
+  [Adaptive Icons](https://developer.android.com/develop/ui/views/launch/icon_design_adaptive).
+- `title`: App display name.
+- `version`: App version (e.g., `1.1`).
+- `android.permissions`: Requested Android permissions. See
+  [Manifest.permission](https://developer.android.com/reference/android/Manifest.permission).
+- `package.name`: Output package name.
+- `package.domain`: Reverse‑DNS app identifier (unique in the Android ecosystem).
+- `orientation`: `portrait` or `landscape`.
+- `android.api`: Target API level (use current stable / highest you can).
+- `android.minapi`: Minimum supported API (e.g., 21+).
 
-#### Special Note on `charset_normalizer` and `requests`:
-If your project uses the 'requests' library or any other library dependent on 'charset_normalizer', ensure to specify 
-the version `charset-normalizer==2.1.1` in your requirements, otherwise there will be an architecture
-mismatch.
+**Special note about `charset_normalizer` / `requests`:**  
+If your project uses **`requests`** or anything that depends on `charset_normalizer`, pin:
+```
+charset-normalizer==2.1.1
+```
+to avoid architecture mismatches during packaging.
 
+### Optional: Pause `pyside6-android-deploy` to tweak config
 
-### PySide6 modification
-Unfortunately the `pyside6-android-deploy` script starts the build proces immediately, without giving
-you the option to manually review the buildozer.spec file, which is the reason why we need to do
-a little modification, but don't worry it's easy:
+By default, `pyside6-android-deploy` immediately starts the build and doesn’t give you a chance to edit
+`buildozer.spec`. You can add a simple pause:
 
-1) Go into your virtual environment to the PySide6 folder (e.g.: venv/lib/python3.11/site-packages/PySide6/scripts/)
-2) Edit the `android_deploy.py` file.
-3) Search for the line: `logging.info("[DEPLOY] Running buildozer deployment")`
-4) Above this line write this: `input("Modify your buildozer.spec now")`
+1. Activate your virtualenv and locate the PySide6 scripts folder (e.g. `venv/lib/python3.11/site-packages/PySide6/scripts/`).
+2. Open `android_deploy.py`.
+3. Find the line:
+   ```python
+   logging.info("[DEPLOY] Running buildozer deployment")
+   ```
+4. Insert this line **above** it:
+   ```python
+   input("Modify your buildozer.spec now and press Enter to continue...")
+   ```
 
+Now the build will pause so you can edit `buildozer.spec` before it proceeds.
 
-When you start building the apk with `pyside6-android-deploy` the build process will stop at some point,
-and then you can make adjustments to the `buildozer.spec` file. After you are done, press enter, and it will 
-go on using your own options in the requirements.
+### Run the final build
 
-# The final build process
 > [!IMPORTANT]
-> Make sure your script is named `main.py`
+> Name your entry script **`main.py`**.
 
-Go into your source directory and type the following:
+From your project’s source directory, run:
 
-`pyside6-android-deploy --wheel-pyside=<your .whl file for the architecture> --wheel-shiboken=<your .whl file for your architecture> --name=main --ndk-path ~/.pyside6_android_deploy/android-ndk/android-ndk-r26b --sdk-path ~/.pyside6_android_deploy/android-sdk/`
+```bash
+pyside6-android-deploy   --wheel-pyside=/path/to/PySide6-6.9.3-...-android_<arch>.whl   --wheel-shiboken=/path/to/shiboken6-6.9.3-...-android_<arch>.whl   --name=main   --ndk-path ~/.pyside6_android_deploy/android-ndk/android-ndk-r27c   --sdk-path ~/.pyside6_android_deploy/android-sdk/
+```
 
-#### Explanation:
-- --wheel-pyside= Here comes your PySide6 wheel, which you've downloaded or compiled
-- --wheel-shiboken= Here comes your Shiboken wheel, which you've downloaded or compiled
-- --name= The name of your application
-- --ndk-path= The path to your Android NDK (See [Setup](#setup))
-- --sdk-path= The path to your Android SDK (See [Setup](#setup))
+**Arguments explained**
 
+- `--wheel-pyside`: The PySide6 Android wheel you downloaded (per architecture).
+- `--wheel-shiboken`: The matching Shiboken6 Android wheel.
+- `--name`: Your application name (entry point is `main.py`).
+- `--ndk-path`: Path to your Android NDK.
+- `--sdk-path`: Path to your Android SDK.
 
-The script will start configuring buildozer and buildozer will start the build process. 
-In the end, you will have a .apk file for the specified Android architecture.
+If everything goes well, you’ll end up with an **`.apk`** for the specified architecture.
 
-### Installation (Best practices)
-I generally recommend you to use ADB / Fastboot to install and debug your Android application.
-Once you understand how it works, it makes your life a lot easier...
+### Install & Debug on Device
 
-1. Go into your system information and tap a few times on your build number
-2. Go (or search) into the developer settings
-3. Enable USB-Debugging (Or Debugging over W-Lan, but this is a little bit advanced)
-4. Install the android tools on your system:
-    - On Arch Linux: `sudo pacman -S android-tools`
-    - On Ubuntu: `sudo apt install android-tools-adb android-tools-fastboot`
-    - On Windows: `Imagine using Windows lol`
+Using **ADB** is the most reliable way to install and debug quickly:
 
-5. Type: `adb devices`
-6. On your device, there should be a popup asking for your permission. Click on confirm.
-7. Type: `adb devices` once again and confirm, that you see your device there.
+1. Enable Developer Options (tap “Build number” multiple times).
+2. Enable **USB debugging** (or **Wireless debugging** if applicable).
+3. Install platform tools:
+   - **Arch Linux:** `sudo pacman -S android-tools`
+   - **Ubuntu/Debian:** `sudo apt install android-tools-adb android-tools-fastboot`
+   - **Windows/macOS:** Install [Android Platform Tools](https://developer.android.com/tools/releases/platform-tools).
 
-The two magical commands
+4. Verify device connection:
+   ```bash
+   adb devices
+   ```
+   Confirm the authorization dialog on your device, then run `adb devices` again.
 
-Install your apk: `adb install <path_to_apk_file>`
-<br>Debug your app: `adb logcat --regex "<package.domain>`
+Alternatively, you can also use Android Studio to install and run your application.
+Android studio will provide you automatically with detailed logging.
 
-After your apk was installed, you will see it in your system apps. Click on your app, 
-scroll down, and at the very last line it should say something like:
+**Core commands**
+
+```bash
+# Install your build
+adb install /path/to/your.apk
+
+# Stream logs (replace with your final package name)
+adb logcat --regex "com.example.yourapp"
+```
+
+Once installed, the app appears in your launcher. In **App info**, you’ll typically see something like:
 
 ```
 Version 2.1.6
-com.digibites.accubattery
+com.example.yourapp
 ```
 
-The first line is your App version, and the second line is your package domain.
-<br>After executing the logcat command, you can start your App and you should see a lot
-of debug messages. In case your app crashes, you can see what went wrong, although the crash
-report isn't always very helpful...
+The first line is the human‑readable app version; the second line is your package ID. Use `adb logcat` while
+launching the app to capture crashes and diagnostics.
 
 > [!NOTE]
-> These instructions are based on my Pixel 7 Pro running Android 14. The steps for you might
-> be different, but in general they are all very similar on all Android devices. If you are 
-> stuck somewhere, XDA, Google and StackOverflow are your best friends :D
+> Steps may vary slightly by device/Android version. If you get stuck, search on Google, Stack Overflow, or XDA.
 
+---
 
+## Common Errors & Fixes
 
-# Errors and (potential) solutions:
-- RuntimeError: "You are including a lot of QML files from a local venv..."
-This error is related to your virtual environment. Make sure your virtual environment
-is NOT inside your projects' folder. It doesn't matter where it is, but must not be in your projects'
-folder. For example, if you have your main.py in a folder named my_project, then your
-virtual environment can't be in this folder! 
-<br>
-Create a new virtual environment in a different location and delete your old one with
-`rm -rf venv .venv` (or whatever you've called it)
-<br>
-This is more an issue from Qt and will hopefully be fixed in a later Qt release, so that
-you don't need to do this anymore. I know it's confusing.
+- **RuntimeError — “You are including a lot of QML files from a local venv…”**  
+  Ensure your **virtual environment is _not_ inside your project folder**. Create it elsewhere and delete the old one:
+  ```bash
+  rm -rf venv .venv
+  ```
+  (This appears to be a Qt quirk and may improve in future releases.)
 
-- c compiler can not create executables
-Don't worry, this issue most of the time comes because you are using a too high API level. Just go into the path, where it
-says the C compiler wouldn't be able to create executables and then look inside this directory. You'll find files ending like
-`androidclang33-` (or something like that). The highest number which is there is the highest number you can select.
+- **“C compiler cannot create executables”**  
+  Often caused by targeting too high an API level for the available toolchains. Inspect the toolchain directory indicated
+  in the error and check the highest available `androidclangXX-` version; use a matching or lower API level.
 
-- blah blash blah is for x86_64 architecture not aarch64
-<br>Solution: Search online if the pip package has a verified aarch64 version. If it doesn't prepare for some months of work
-building the recipes lmao
+- **“… is for x86_64 architecture, not aarch64” (or similar)**  
+  Verify that each third‑party wheel you depend on has an Android build for your target architecture. If not, you may need
+  to provide/build a recipe (expect significant effort).
 
-- DeadObjectException (Couldn't insert ... into...) 
-If you see this, you can make yourself some coffee, turn on UK-Drill and try to find the error the next
-few months :) This error can be literally anything, but most of the time it's because you are trying to access
-a resource that doesn't exist. In my case it was a `logging.debug` function which made the whole application
-crash, because I couldn't access the `log.log` file for some reason. So, if you see the DeadObjectException I recommend
-you `STRONGLY` to go to [Debugging](#debugging) to find and fix the issue.
+- **`DeadObjectException` (e.g., “Couldn't insert … into …”)**  
+  This is a generic failure that can have many causes—often trying to access a resource that doesn’t exist or is
+  inaccessible. Check file paths, storage permissions, and logging calls. If you see this, jump to the
+  [Debugging Strategy](#debugging-strategy-highly-recommended).
 
-  
-- No module named <your_module>
-Sometimes it's not enough to just specify the module name. For example, if you want to use
-`httpx` you also need to list `httpx`, `httpcore`,`idna`, `certifi`, `h11`, `sniffio` in the 
-requirements, until it works.
+- **`ModuleNotFoundError: No module named <your_module>`**  
+  Some libraries pull in additional dependencies you must list explicitly under `requirements`. For example, using `httpx`
+  may require `httpx`, `httpcore`, `idna`, `certifi`, `h11`, and `sniffio`. Inspect dependency trees and include all
+  required packages.
 
-Whenever you get such an error, I recommend you to look into the module and its dependencies and include all
-the dependencies and the dependencies of the dependencies. It will be some trial and error, but
-once you have got it working, it will be clear.
+---
 
-
-
-# DEBUGGING
+## Debugging Strategy (Highly Recommended)
 
 > [!IMPORTANT]
-> THIS SECTION IS VERY IMPORTANT
+> Expect the **first run to crash** while you sort out packaging details. Proactive logging helps you pinpoint the issue fast.
 
-Your App **WILL CRASH** on its first run (except if you are a god), so what you do is:
-
-Write this into your Python application:
+Add a minimal HTTP logger that works without external dependencies:
 
 ```python
 import http.client
 import json
 
-def send_error_log(message):
-    url = "<your_pc's_ip>:8000" # Don't forget to place the IP of the device your server runs on
+def send_error_log(message: str):
+    url = "<your_pc_ip>:8000"  # e.g. 192.168.1.23:8000
     endpoint = "/error-log/"
     data = json.dumps({"message": message})
     headers = {"Content-type": "application/json"}
-
     conn = http.client.HTTPConnection(url)
-
     conn.request("POST", endpoint, data, headers)
 ```
 
-This function does not need any dependencies, and will 100% work no matter what's wrong with your App. You place
-it on top of your function, and then you always use the `send_error_log()` call with your message.
-For example, you have different functions in your app, and it crashes you log every new line in your Python application
-until you can see where it exactly crashed. I know it's a lot of pain, but this is your only option to find the error!
+Sprinkle `send_error_log("reached step X")` through critical code paths to find the exact crash point.
 
-**Server Code**
+**Simple receiver (FastAPI):**
 
 ```python
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
-
 
 class ErrorLog(BaseModel):
     message: str
 
-
 app = FastAPI()
-
 
 @app.post("/error-log/")
 def receive_error_log(error_log: ErrorLog):
     print(f"Received error: {error_log.message}")
     return {"detail": "Error log received"}
 
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
-Run this on your PC or Phone, and it will receive the error logs from your Android Application
-<br>Requirements: `pip install pydantic fastapi uvicorn`
+Run this on your computer or another device on the same network:
+```
+pip install fastapi pydantic uvicorn
+```
 
 > [!IMPORTANT]
-> I AGAIN want to remind you of using Java version 17! Java 11 is supported by Gradle and even recommended, but not
-> supported by Qt, and version 21 is supported by Qt, but not by the currently used Gradle version. This may change in the
-> future and I will update it accordingly.
+> Use **Java 17**. While Gradle often recommends Java 11 and newer JDKs exist (e.g., 21),
+> Qt’s current toolchain is aligned with **JDK 17**.
 
-# Contributions / Issues
-If you see Issues in this guide, or you have something to improve it, feel free to open PRs and Issues. I'll
-respond to them and try to help you as much as possible.  (Only for Arch Linux).
+---
 
-Maybe someone of you can make an alternative readme for other distros. Would be nice :) 
-
-# Support
-I appreciate every star on this repo, as it shows me that my work is useful for people, and it keeps me motivated :)
-
-
-# Legacy (Building the wheels)
+## Legacy: Building the Wheels Yourself
 
 > [!NOTE]
-> Please note that this won't be maintained as often and that the following part is NOT perfect
-> and may contain some issues. This is made to get you into the right direction, but shouldn't be 
-> seen as a perfect tutorial or guide!
+> This path is provided for reference and is **not** maintained as frequently. It may contain rough edges. Proceed if
+> you specifically need custom builds or unsupported combinations.
 
+### Install Qt
+- Sign in at [qt.io](https://qt.io).
+- Download the Qt Online Installer.
+- Install both **Desktop** and **Android** components (≈ 1.3 GB download).
 
-## Installing Qt
-- Log in to your Qt account at [Qt](https://qt.io)
-- Download the Qt Online Installer and execute it
-- Select "Desktop" and "Android" and install Qt (Should be around ~1.3 Gigabyte downloading)
+### Install dependencies
 
-# Install dependencies
 #### Arch Linux (recommended)
 
-```
+```bash
 sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm openssl cmake wget p7zip git zip
 ```
 
-## Python3.10 Support
-> [!NOTE]
-> If you want to compile your App using Python3.10 you need to install Python3.10 with shared libraries. 
-> You only need this if you want Python3.10
-
-# PySide-Setup
-Explanation:
-
-This is the source directory of PySide6. Just execute the bash stuff below. It will install the needed stuff. Execute this one time
-and REMEMBER where you've cloned this to, as we need this later :)
-
+### Prepare `pyside-setup`
 
 ```bash
-python -m venv venv # Needed, trust me...
+python -m venv venv
 source venv/bin/activate
 git clone https://code.qt.io/pyside/pyside-setup
 wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
 7z x libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
 export LLVM_INSTALL_DIR=$PWD/libclang
 
+# Persist for your shell
 if [ -n "$ZSH_VERSION" ]; then
-    echo "export LLVM_INSTALL_DIR=$PWD/libclang" >> ~/.zshrc
+  echo "export LLVM_INSTALL_DIR=$PWD/libclang" >> ~/.zshrc
 elif [ -n "$BASH_VERSION" ]; then
-    echo "export LLVM_INSTALL_DIR=$PWD/libclang" >> ~/.bashrc
+  echo "export LLVM_INSTALL_DIR=$PWD/libclang" >> ~/.bashrc
 fi
 
 cd pyside-setup
-git checkout 6.9.1 # You can also use dev branch, but I wouldn't recommend, because it can cause issues
+git checkout 6.9.3   # dev is possible, but not recommended
 pip install -r requirements.txt
 pip install -r tools/cross_compile_android/requirements.txt
 pip install pyside6
 cd
 ```
 
-# Building the Qt Wheels
-Explanation:
+### Build Qt/PySide Wheels
 
-We are going inside the `pyside-setup` folder which you've cloned. This folder is the source code of PySide6. The tool for 
-compiling the wheels is located in `tools/cross_compile_android/main.py`. 
+The build helper lives at `pyside-setup/tools/cross_compile_android/main.py`.
 
-There are 4 Android architectures:
-- aarch64
-- armv7a
-- x86_64
-- i686
-
-You want to build your Application for all of these architectures, so that your App runs on any Android Device including the oldest
-phone from 11 years ago and a new Android Tablet from 2024 :)
+Android architectures:
+- `aarch64`
+- `armv7a`
+- `x86_64`
+- `i686`
 
 > [!NOTE]
-> If you want to use Python3.10 instead of Python3.11 modify the main.py script. You'll find a line saying: "PYTHON_VERSION = 3.11". Change this to 3.10.
-> (It's line 21)
+> You only need to build these once; you can reuse the wheels across projects.
 
-> [!NOTE]
-> If you want to use a different NDK version than r27c, go into `tools/cross_compile_android/android_utilities.py` and 
-> change the value in the NDK version to your preferred one (at the top of the script)
+**Speed‑ups (optional):**
+- To build for **Python 3.10**, edit `main.py` and change `PYTHON_VERSION = 3.11` to `3.10`.
+- To change the NDK version from `r27c`, edit `tools/cross_compile_android/android_utilities.py`.
+- To speed up CPython cloning, in `main.py` find `if not cpython_dir.exists():` and add `depth=1` to `Repo.clone_from()`.
 
-Quick Information: You only need to build the wheels once, and you can use them for all your projects. So this is a one time step!
+**Template command:**
 
-The basic command for building the wheels is the following:
+```bash
+python tools/cross_compile_android/main.py   --plat-name=<aarch64|armv7a|x86_64|i686>   --qt-install-path=/path/to/Qt/6.9.1   --api-level 35   --auto-accept-license
+```
 
-`python tools/cross_compile_android/main.py --plat-name= --qt-install-path= --api-level 35 --auto-accept-license`
+Wheels appear under `dist/` when complete. If you hit errors, try:
+```
+--clean-cache all
+```
 
-> [!NOTE]
-> If you want to save some time when cloning the Cpython repository, modify the main.py script. Search for: `if not cpython_dir.exists():`
-> Under it, you see the Repo.clone_from() call. Add the following argument to it: `depth=1`
+---
 
-This will only clone the latest commits and branch from the Python repository, otherwise you'll clone a lot of unnecessary
-data.
+## Contributing
 
---plat-name = Here comes your Android architecture. e.g, aarch64 or armv7a
-<br>--qt-install-path = Here comes your Qt installation path. e.g, "/home/$USER/Qt/6.9.1" or "/opt/Qt/6.9.1"
-<br>--api-level = Here comes your target android API level. I recommend 35.
-Now, execute this command for all 4 Android architectures.
-Your Wheels should be in the `dist` folder at the end.
+Spotted inaccuracies or have improvements? Please open an issue or PR. Contributions for other distributions (besides
+Arch) are especially welcome.
 
-If you get any errors, try to use the `--clean-cache all` argument first.
+## Support
+If this guide helped you, a ⭐ on the repository is appreciated—it helps others discover it and keeps the project healthy.
+
+## Donations
+Compiling your application is very easy since Qt 6.8, however, if I was able to
+save you some time with this guide, you can donate me money through:
+
+- [PayPal](https://paypal.me/EchterAlsFake)
+- [Ko-Fi](https://ko-fi.com/echteralsfake)
+
+**Thank you very much <3**

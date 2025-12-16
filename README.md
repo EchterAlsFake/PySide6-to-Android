@@ -14,7 +14,7 @@
 
 ## Supported Versions
 
-- **PySide6:** `6.9.3` (guide verified against this version)
+- **PySide6:** `6.10.1` (guide verified against this version)
 - **Python:** `3.11.x` (preferred) or `3.10.x`
 
 > [!WARNING]
@@ -60,16 +60,15 @@ You’ll save hours of compilation time and avoid a lot of complexity.
 > [!NOTE]
 > As of now, official Android wheels are available for **`aarch64`** and **`x86_64`**.
 
-**Direct links for 6.9.1 (Python 3.11):**
+**Direct links for 6.10.1 (Python 3.11):**
 
 - **PySide6**
-  - [aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.3-6.9.3-cp311-cp311-android_aarch64.whl)
-  - [x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.3-6.9.3-cp311-cp311-android_x86_64.whl)
+  - [aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.10.0-6.10.0-cp311-cp311-android_aarch64.whl)
+  - [x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.10.1-6.10.1-cp311-cp311-android_x86_64.whl)
 
 - **Shiboken6**
-  - [aarch64]() (NOT AVAILABLE)
-  - [x86_64]()  (NOT AVAILABLE)
-
+  - [aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.10.1-6.10.1-cp311-cp311-android_aarch64.whl) (NOT AVAILABLE)
+  - [x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.10.1-6.10.1-cp311-cp311-android_x86_64.whl)  (NOT AVAILABLE)
 
 
 If you prefer building your own wheels, see the [Legacy](#legacy-building-the-wheels-yourself) section below.
@@ -95,7 +94,7 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm 
 cd ~/
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup
-git checkout 6.9.3   # dev branch can work, but is more error-prone
+git checkout 6.10.1   # dev branch can work, but is more error-prone
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -314,7 +313,7 @@ pip install fastapi pydantic uvicorn
 
 > [!NOTE]
 > This path is provided for reference and is **not** maintained as frequently. It may contain rough edges. Proceed if
-> you specifically need custom builds or unsupported combinations.
+> you specifically need custom-builds or unsupported combinations.
 
 ### Install Qt
 - Sign in at [qt.io](https://qt.io).
@@ -332,22 +331,11 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm 
 ### Prepare `pyside-setup`
 
 ```bash
-python -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate
 git clone https://code.qt.io/pyside/pyside-setup
-wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
-7z x libclang-release_140-based-linux-Rhel8.2-gcc9.2-x86_64.7z
-export LLVM_INSTALL_DIR=$PWD/libclang
-
-# Persist for your shell
-if [ -n "$ZSH_VERSION" ]; then
-  echo "export LLVM_INSTALL_DIR=$PWD/libclang" >> ~/.zshrc
-elif [ -n "$BASH_VERSION" ]; then
-  echo "export LLVM_INSTALL_DIR=$PWD/libclang" >> ~/.bashrc
-fi
-
 cd pyside-setup
-git checkout 6.9.3   # dev is possible, but not recommended
+git checkout 6.10.1   # dev is possible, but not recommended
 pip install -r requirements.txt
 pip install -r tools/cross_compile_android/requirements.txt
 pip install pyside6
@@ -367,6 +355,18 @@ Android architectures:
 > [!NOTE]
 > You only need to build these once; you can reuse the wheels across projects.
 
+#### Important:
+You need to make a dummy fix for armv7a to work. After you have compiled the other 3 architectues, go to:
+`~/.pyside6_android_deploy/toolchain_armv7a.cmake` and remove the if statement after line 28, where it
+applies the `'-mpopcnt'` as a target, because this is invalid for armv7a. I don't know why Qt has it there, because
+it makes no sense, but yeah just remove it, and you are good to go.
+
+So basically remove evrything after the `set(QT_COMPILER_FLAGS) .... -Wno-unused-command-line-argument")`
+and before `set(QT_COMPILER_FLAGS_RELEASE "-O2 -pipe")`
+
+But that don't clean cache then, because this will obviously override the toolchain. 
+
+
 **Speed‑ups (optional):**
 - To build for **Python 3.10**, edit `main.py` and change `PYTHON_VERSION = 3.11` to `3.10`.
 - To change the NDK version from `r27c`, edit `tools/cross_compile_android/android_utilities.py`.
@@ -375,7 +375,7 @@ Android architectures:
 **Template command:**
 
 ```bash
-python tools/cross_compile_android/main.py   --plat-name=<aarch64|armv7a|x86_64|i686>   --qt-install-path=/path/to/Qt/6.9.1   --api-level 35   --auto-accept-license
+python tools/cross_compile_android/main.py --plat-name=<aarch64|armv7a|x86_64|i686> --qt-install-path=/path/to/Qt/6.10.1 --api-level 35 --auto-accept-license --clean-cache all
 ```
 
 Wheels appear under `dist/` when complete. If you hit errors, try:
@@ -386,7 +386,6 @@ Wheels appear under `dist/` when complete. If you hit errors, try:
 ---
 
 ## Contributing
-
 Spotted inaccuracies or have improvements? Please open an issue or PR. Contributions for other distributions (besides
 Arch) are especially welcome.
 

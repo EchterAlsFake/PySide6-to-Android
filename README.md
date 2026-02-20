@@ -14,7 +14,7 @@
 
 ## Supported Versions
 
-- **PySide6:** `6.10.1` (guide verified against this version)
+- **PySide6:** `6.10.2` (guide verified against this version)
 - **Python:** `3.11.x` (preferred) or `3.10.x`
 
 > [!WARNING]
@@ -60,15 +60,15 @@ You’ll save hours of compilation time and avoid a lot of complexity.
 > [!NOTE]
 > As of now, official Android wheels are available for **`aarch64`** and **`x86_64`**.
 
-**Direct links for 6.10.1 (Python 3.11):**
+**Direct links for 6.10.2 (Python 3.11):**
 
 - **PySide6**
-  - [aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.10.0-6.10.0-cp311-cp311-android_aarch64.whl)
-  - [x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.10.1-6.10.1-cp311-cp311-android_x86_64.whl)
+  - [aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.10.2-6.10.2-cp311-cp311-android_aarch64.whl)
+  - [x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.10.2-6.10.2-cp311-cp311-android_x86_64.whl)
 
 - **Shiboken6**
-  - [aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.10.1-6.10.1-cp311-cp311-android_aarch64.whl) (NOT AVAILABLE)
-  - [x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.10.1-6.10.1-cp311-cp311-android_x86_64.whl)  (NOT AVAILABLE)
+  - [aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.10.2-6.10.2-cp311-cp311-android_aarch64.whl)
+  - [x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.10.2-6.10.2-cp311-cp311-android_x86_64.whl))
 
 
 If you prefer building your own wheels, see the [Legacy](#legacy-building-the-wheels-yourself) section below.
@@ -94,7 +94,7 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk17-openjdk llvm 
 cd ~/
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup
-git checkout 6.10.1   # dev branch can work, but is more error-prone
+git checkout 6.10.2   # dev branch can work, but is more error-prone
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt

@@ -335,7 +335,7 @@ python3.11 -m venv venv
 source venv/bin/activate
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup
-git checkout 6.10.1   # dev is possible, but not recommended
+git checkout 6.10.2   # dev is possible, but not recommended
 pip install -r requirements.txt
 pip install -r tools/cross_compile_android/requirements.txt
 pip install pyside6

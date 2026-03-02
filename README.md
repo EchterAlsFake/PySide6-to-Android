@@ -68,7 +68,7 @@ You’ll save hours of compilation time and avoid a lot of complexity.
 
 - **Shiboken6**
   - [aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.10.2-6.10.2-cp311-cp311-android_aarch64.whl)
-  - [x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.10.2-6.10.2-cp311-cp311-android_x86_64.whl))
+  - [x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.10.2-6.10.2-cp311-cp311-android_x86_64.whl)
 
 
 If you prefer building your own wheels, see the [Legacy](#legacy-building-the-wheels-yourself) section below.
@@ -355,19 +355,18 @@ Android architectures:
 > [!NOTE]
 > You only need to build these once; you can reuse the wheels across projects.
 
-#### Important:
-You need to make a dummy fix for armv7a to work. After you have compiled the other 3 architectues, go to:
+### Important (armv7a Fix):
+You need to make a dummy fix for armv7a to work. After you have compiled the other 3 architectures, go to:
 `~/.pyside6_android_deploy/toolchain_armv7a.cmake` and remove the if statement after line 28, where it
 applies the `'-mpopcnt'` as a target, because this is invalid for armv7a. I don't know why Qt has it there, because
 it makes no sense, but yeah just remove it, and you are good to go.
 
-So basically remove evrything after the `set(QT_COMPILER_FLAGS) .... -Wno-unused-command-line-argument")`
+So basically remove everything after the `set(QT_COMPILER_FLAGS) .... -Wno-unused-command-line-argument")`
 and before `set(QT_COMPILER_FLAGS_RELEASE "-O2 -pipe")`
 
-But that don't clean cache then, because this will obviously override the toolchain. 
+But don't clean cache then, because this will obviously override the toolchain. 
 
-
-**Speed‑ups (optional):**
+#### Other Info
 - To build for **Python 3.10**, edit `main.py` and change `PYTHON_VERSION = 3.11` to `3.10`.
 - To change the NDK version from `r27c`, edit `tools/cross_compile_android/android_utilities.py`.
 - To speed up CPython cloning, in `main.py` find `if not cpython_dir.exists():` and add `depth=1` to `Repo.clone_from()`.
@@ -375,7 +374,7 @@ But that don't clean cache then, because this will obviously override the toolch
 **Template command:**
 
 ```bash
-python tools/cross_compile_android/main.py --plat-name=<aarch64|armv7a|x86_64|i686> --qt-install-path=/path/to/Qt/6.10.1 --api-level 35 --auto-accept-license --clean-cache all
+python tools/cross_compile_android/main.py --plat-name=<aarch64|armv7a|x86_64|i686> --qt-install-path=/path/to/Qt/6.10.2 --api-level 35 --auto-accept-license --clean-cache all
 ```
 
 Wheels appear under `dist/` when complete. If you hit errors, try:

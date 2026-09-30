@@ -335,11 +335,13 @@ OpenSSL, libffi, bzip2, xz, SQLite, and CPython, with optional installation of
 Arch Linux host build packages. It can also invoke the companion fork to build
 the corresponding PySide6 wheels.
 
-The source-build path has produced and statically validated AArch64 wheels for
-Python 3.10 through 3.14 and armv7 wheels for Python 3.10 through 3.12.
+The source-build path has produced and statically validated AArch64 and armv7
+wheels for Python 3.10 through 3.14.
 Use `scripts/rebuild-android-matrix.sh` to build the remaining combinations.
 The artifacts have not yet been run in an APK; device and emulator testing
 remains necessary.
+The completed wheels and Android Python runtimes are backed up in the
+[Qt 6.11.2 Android matrix prerelease](https://github.com/EchterAlsFake/PySide6-to-Android/releases/tag/android-matrix-snapshot-2026-09-30).
 
 ---
 

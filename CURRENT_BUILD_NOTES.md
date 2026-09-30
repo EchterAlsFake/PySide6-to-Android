@@ -151,14 +151,20 @@ rebuilt with the updated linker template, as recorded below.
 
 The matrix helpers in `scripts/` now build Qt, native dependencies, CPython,
 PySide6, and Shiboken6 for all four Android ABIs and Python 3.10–3.14. The
-build is resumable with `RESUME=1`. The completed arm64 wheels for all five
-Python versions and armv7 wheels for Python 3.10–3.12 pass runtime and wheel
-audits, including Android ELF architecture and 16 KiB alignment. The older
+build is resumable with `RESUME=1`. The completed arm64 and armv7 wheels for
+all five Python versions pass runtime and wheel audits, including Android ELF
+architecture and 16 KiB alignment. The older
 arm64 wheels were rebuilt with the corrected linker flags. armv7 Qt was also
-rebuilt with explicit 16 KiB linker flags. Python 3.13–3.14 armv7 and all x86
-and x86_64 combinations remain to be built.
+rebuilt with explicit 16 KiB linker flags. All x86 and x86_64 combinations
+remain to be built.
 
 The wheel files and Android runtime prefixes are in ignored `work/`; Git
 commits contain the scripts and documentation, not those binary artifacts.
 Device or emulator execution has not yet been tested. QtNetwork HTTPS still
 needs a Qt build configured with Android OpenSSL.
+
+The 20 completed wheel files, SHA-256 list, and compressed Android CPython
+runtime prefixes have been backed up to the GitHub prerelease
+`android-matrix-snapshot-2026-09-30`. The main build scripts are on `master`
+and the companion PySide fork is on branch `android-cross-build-fixes` at
+`https://github.com/EchterAlsFake/pyside-setup`.

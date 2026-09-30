@@ -2,13 +2,18 @@
 
 This is the reproducible source-build path for Qt/PySide 6.11.2. It targets
 Android AArch64 (`arm64-v8a` / wheel platform `android_aarch64`) and supports
-separate wheel builds for CPython 3.10, 3.11, and 3.14.
+separate wheel builds for CPython 3.10 through 3.14.
 
 The patched helper lives in the companion
 [`pyside-setup-android`](https://github.com/EchterAlsFake/pyside-setup-android)
 fork. Until that GitHub repository is created, the prepared checkout is the
 local sibling directory `../pyside-setup-android` on branch
 `android-cross-build-fixes`.
+
+For a CPython runtime with Android builds of OpenSSL, libffi, bzip2, xz, and
+SQLite, use the [runtime build helper](RUNTIME_BUILD.md). It populates the same
+versioned target prefix used by the companion fork and can run the wheel build
+after the native dependencies and Python are ready.
 
 ## Toolchain versions
 
@@ -137,9 +142,11 @@ sets into each:
 cd "$PYSIDE_FORK"
 python3.10 -m venv "$BUILD_ROOT/venvs/py310"
 python3.11 -m venv "$BUILD_ROOT/venvs/py311"
+python3.12 -m venv "$BUILD_ROOT/venvs/py312"
+python3.13 -m venv "$BUILD_ROOT/venvs/py313"
 python3.14 -m venv "$BUILD_ROOT/venvs/py314"
 
-for venv in py310 py311 py314; do
+for venv in py310 py311 py312 py313 py314; do
     "$BUILD_ROOT/venvs/$venv/bin/pip" install \
         -r requirements.txt \
         -r tools/cross_compile_android/requirements.txt
@@ -165,7 +172,8 @@ directory. This example is for Python 3.14:
     --verbose
 ```
 
-Repeat with `py310` / `3.10` and `py311` / `3.11`. The fork keeps each
+Repeat with `py310` / `3.10`, `py311` / `3.11`, `py312` / `3.12`, and
+`py313` / `3.13`. The fork keeps each
 CPython checkout, target installation, and generated toolchain versioned, so
 the builds no longer overwrite or silently reuse one another.
 
@@ -186,11 +194,20 @@ Python versions:
 | 3.14 | `cp314-cp314-android_aarch64` | 86,402,309 bytes | 274,228 bytes |
 
 Each archive passed `unzip -t`. The extension modules are AArch64 Android 35
-ELF binaries built by NDK r27c, link against the matching versioned
-`libpython3.x.so`, and use 16 KiB load alignment. No host-architecture ELF was
+ELF binaries built by NDK r27c and link against the matching versioned
+`libpython3.x.so`. A later full-archive audit found that the Shiboken shared
+objects in these older wheels have 4 KiB load alignment; rebuild them with
+the updated fork for 16 KiB support. No host-architecture ELF was
 found among the 1,038 files audited in the three packaged trees. Exact hashes
 and the failure history are recorded in
 [CURRENT_BUILD_NOTES.md](CURRENT_BUILD_NOTES.md).
+
+On 29 September 2026, the [runtime helper](RUNTIME_BUILD.md) built Python
+3.12 and 3.13 AArch64 runtimes with Android OpenSSL, libffi, bzip2, xz, and
+SQLite, then produced matching PySide6 and Shiboken6 wheels. Both wheel pairs
+passed full-archive architecture and 16 KiB alignment checks. Their hashes
+and the correction to the earlier Shiboken alignment claim are in
+[CURRENT_BUILD_NOTES.md](CURRENT_BUILD_NOTES.md#29-september-2026-update).
 
 ## Known limitations
 
@@ -200,7 +217,8 @@ and the failure history are recorded in
 - The generic CPython build omits optional modules whose Android dependencies
   were not supplied, including OpenSSL, libffi, bzip2, and lzma. This is enough
   as a development prefix for compiling PySide, but not a complete production
-  Python runtime.
+  Python runtime. The separate [runtime helper](RUNTIME_BUILD.md) supplies
+  these dependencies and SQLite for new builds.
 - The Qt configuration above also has no Android OpenSSL build, so QtNetwork
   HTTPS is not enabled. The fork fixes PySide's incorrect unconditional
   `QSslEllipticCurve` wrapper source for this configuration. Supply an Android
@@ -210,7 +228,7 @@ and the failure history are recorded in
   packaging even when this helper is used to build the PySide wheels.
 - The wheels have been compiled and statically inspected, but have not been
   run inside an APK on a device or emulator. Treat that as a required release
-  test, especially for the experimental Python 3.10 and 3.14 builds.
+  test for every source-built Python version.
 
 See [CURRENT_BUILD_NOTES.md](CURRENT_BUILD_NOTES.md) for the exact failures
 reproduced while bringing the old guide forward.

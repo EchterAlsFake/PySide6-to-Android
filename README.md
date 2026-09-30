@@ -16,10 +16,10 @@
 
 - **Qt / PySide6:** `6.11.2`
 - **Official Android wheels:** Python `3.11`, AArch64 and x86_64
-- **Experimental source builds from the companion fork:** Python `3.10`, `3.11`, and `3.14`
+- **Experimental source builds from the companion fork:** Python `3.10`–`3.14` on AArch64
 
 > [!WARNING]
-> Python 3.10 and 3.14 wheels require a source build. They are not substitutes
+> Python versions other than the official 3.11 require a source build. Wheels are not substitutes
 > for testing the complete Python runtime and application packaging on a real
 > Android device.
 
@@ -326,13 +326,20 @@ See the complete [Qt 6.11 source-build guide](SOURCE_BUILD_6.11.md). It covers:
 - the extra host generators required by Quick3D, SCXML, RemoteObjects,
   CanvasPainter, and Lottie;
 - the SDK 36 versus native API 35 split;
-- separate, versioned CPython caches for 3.10, 3.11, and 3.14;
+- separate, versioned CPython caches for 3.10 through 3.14;
 - the corrected ARM compiler flags and dynamically derived Python SOABI;
 - known OpenSSL and optional CPython-module limitations.
 
+The [Android runtime helper](RUNTIME_BUILD.md) automates target builds of
+OpenSSL, libffi, bzip2, xz, SQLite, and CPython, with optional installation of
+Arch Linux host build packages. It can also invoke the companion fork to build
+the corresponding PySide6 wheels.
+
 The source-build path has produced and statically validated AArch64 wheels for
-Python 3.10, 3.11, and 3.14. The artifacts have not yet been run in an APK;
-treat device/emulator testing and all other Android ABIs as experimental.
+Python 3.10 through 3.14 and armv7 wheels for Python 3.10 through 3.12.
+Use `scripts/rebuild-android-matrix.sh` to build the remaining combinations.
+The artifacts have not yet been run in an APK; device and emulator testing
+remains necessary.
 
 ---
 

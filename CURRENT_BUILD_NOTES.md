@@ -110,9 +110,12 @@ Android OpenSSL are absent in this configuration.
 
 All six archives pass `unzip -t`. Their wheel tags are the matching
 `cp310`, `cp311`, or `cp314` plus `android_aarch64`. The PySide and Shiboken
-extensions are AArch64 Android 35 ELF objects, depend on the matching
-`libpython3.x.so`, and have `0x4000` (16 KiB) load alignment. An audit of 1,038
-ELF files in the three packaged trees found no host-architecture binaries.
+extensions are AArch64 Android 35 ELF objects and depend on the matching
+`libpython3.x.so`. A later full-archive audit found that the Shiboken shared
+objects in these older wheels have `0x1000` (4 KiB) load alignment; the
+companion fork's linker template was corrected on 29 September 2026. An audit
+of 1,038 ELF files in the three packaged trees found no host-architecture
+binaries.
 
 Artifacts are under `work/wheels/py310`, `work/wheels/py311`, and
 `work/wheels/py314`. They have not yet been exercised in an APK on a device or
@@ -120,3 +123,42 @@ emulator, so runtime compatibility remains a separate validation step.
 
 Large downloaded sources, SDKs, build trees, and artifacts live below
 `work/`, which is intentionally ignored by Git.
+
+## 29 September 2026 update
+
+The new `scripts/build-android-runtime.sh` builds target OpenSSL 3.5.8 LTS,
+libffi 3.4.8, bzip2 1.0.8, xz 5.8.4, SQLite 3.50.4, and CPython. Arch Linux
+host package installation is available only when `--install-arch-deps` is
+requested. AArch64 CPython 3.12 and 3.13 runtimes now include `_ssl`,
+`_hashlib`, `_ctypes`, `_bz2`, `_lzma`, and `_sqlite3`. The runtime audit passed
+76 and 77 Android shared objects respectively, all with 16 KiB load alignment.
+
+The companion fork's Android linker template now requests 16 KiB alignment
+for Shiboken as well. Fresh Qt for Python 6.11.2 AArch64 wheels were built:
+
+| Python | PySide6 SHA-256 | Shiboken6 SHA-256 |
+| --- | --- | --- |
+| 3.12 | `09c5247845cb74aac32a68746165135c274d32b139ce73393dc4bfc8bd92976a` | `38f0ff1bb427f2e69fde0e5080237b9dec7277d0a404fa268b458602deadc6cd` |
+| 3.13 | `f54a077b2a964460b8d5766cea553c5134c072b24be37b5b56ce02eef68ec59a` | `e3f6782b61b12d7d56500857c892739177984033421ca9b2284656bb1faddeec` |
+
+Each wheel pair passed archive integrity, wheel-tag, AArch64 ELF, and 16 KiB
+alignment checks across 347 packaged shared objects. Artifacts are under
+`work/wheels/py312` and `work/wheels/py313`. They have not been tested in an
+APK. The older 3.10, 3.11, and 3.14 Shiboken wheels were subsequently
+rebuilt with the updated linker template, as recorded below.
+
+## 30 September 2026 rebuild status
+
+The matrix helpers in `scripts/` now build Qt, native dependencies, CPython,
+PySide6, and Shiboken6 for all four Android ABIs and Python 3.10–3.14. The
+build is resumable with `RESUME=1`. The completed arm64 wheels for all five
+Python versions and armv7 wheels for Python 3.10–3.12 pass runtime and wheel
+audits, including Android ELF architecture and 16 KiB alignment. The older
+arm64 wheels were rebuilt with the corrected linker flags. armv7 Qt was also
+rebuilt with explicit 16 KiB linker flags. Python 3.13–3.14 armv7 and all x86
+and x86_64 combinations remain to be built.
+
+The wheel files and Android runtime prefixes are in ignored `work/`; Git
+commits contain the scripts and documentation, not those binary artifacts.
+Device or emulator execution has not yet been tested. QtNetwork HTTPS still
+needs a Qt build configured with Android OpenSSL.

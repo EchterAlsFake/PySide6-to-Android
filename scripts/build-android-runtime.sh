@@ -155,7 +155,7 @@ if [[ ! -x "$HOST/bin/python$PYTHON_VERSION" ]]; then
     fi
     # Older helper runs built CPython in its source checkout. An out-of-tree
     # host build refuses to proceed until those generated objects are cleaned.
-    if [[ -f "$PY_SOURCE/Makefile" ]]; then
+    if [[ -s "$PY_SOURCE/Makefile" ]]; then
         make -C "$PY_SOURCE" distclean
     fi
     mkdir -p "$BUILDS/python-host-$PYTAG"
@@ -174,7 +174,7 @@ if [[ ! -f "$TARGET/.runtime-openssl-3.5.8-16k.done" ]]; then
     (
         cd "$BUILDS/python-target-$PYTAG"
         export PATH="$HOST/bin:$PATH"
-        if [[ -f Makefile ]]; then make distclean; fi
+        if [[ -s Makefile ]]; then make distclean; fi
         export CPPFLAGS="-I$DEPS/include"
         export CFLAGS="-O2 -fPIC -DANDROID"
         export LDFLAGS="-L$DEPS/lib $ALIGN_FLAGS"

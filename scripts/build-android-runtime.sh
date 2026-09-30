@@ -175,6 +175,11 @@ if [[ ! -f "$TARGET/.runtime-openssl-3.5.8-16k.done" ]]; then
         cd "$BUILDS/python-target-$PYTAG"
         export PATH="$HOST/bin:$PATH"
         if [[ -s Makefile ]]; then make distclean; fi
+        # An interrupted freeze step can leave empty headers whose timestamps
+        # make make skip regeneration, causing undeclared _Py_M_* symbols.
+        if [[ -d Python/frozen_modules ]]; then
+            find Python/frozen_modules -maxdepth 1 -type f -name '*.h' -size 0 -delete
+        fi
         export CPPFLAGS="-I$DEPS/include"
         export CFLAGS="-O2 -fPIC -DANDROID"
         export LDFLAGS="-L$DEPS/lib $ALIGN_FLAGS"

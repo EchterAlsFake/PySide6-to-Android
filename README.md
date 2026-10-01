@@ -1,5 +1,11 @@
 # PySide6 on Android — Practical Guide
 
+> [!CAUTION]
+> Because of the next exams in school and my focus shifting entirely to my other projects, I am heavily
+using AI to maintain this project. Everything you see is tested by a human!
+
+If you have a problem with that, make your own :) 
+
 > [!NOTE]
 > This guide is **unofficial** and not affiliated with Qt. For authoritative details on the Android toolchain and the
 > overall process, see the official documentation and blog posts:

@@ -97,8 +97,8 @@ sudo pacman -Syu base-devel android-tools android-udev clang jdk21-openjdk llvm 
 
 ```bash
 cd ~/
-git clone https://github.com/EchterAlsFake/pyside-setup-android
-cd pyside-setup-android
+git clone https://github.com/EchterAlsFake/pyside-setup
+cd pyside-setup
 git checkout android-cross-build-fixes
 python3 -m venv venv
 source venv/bin/activate

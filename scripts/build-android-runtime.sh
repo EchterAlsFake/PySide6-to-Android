@@ -229,8 +229,14 @@ if ((BUILD_WHEELS)); then
     PYSIDE_FORK=${PYSIDE_FORK:-"$ROOT/../pyside-setup-android"}
     QT_VERSION=${QT_VERSION:-6.12.0}
     QT_PREFIX=${QT_PREFIX:-"$WORK_ROOT/qt/$QT_VERSION"}
-    QT_HOST_PREFIX=${QT_HOST_PREFIX:-"$QT_PREFIX/gcc_64"}
-    ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-"$WORK_ROOT/android-sdk"}
+    QT_HOST_PREFIX=${QT_HOST_PREFIX:-"$WORK_ROOT/qt/$QT_VERSION/gcc_64"}
+    if [[ -z "${ANDROID_SDK_ROOT:-}" ]]; then
+        if [[ -d "$WORK_ROOT/android-sdk" ]]; then
+            ANDROID_SDK_ROOT="$WORK_ROOT/android-sdk"
+        else
+            ANDROID_SDK_ROOT="$HOME/.pyside6_android_deploy/android-sdk"
+        fi
+    fi
     case "$ABI" in
         aarch64) QT_ABI=arm64_v8a ;;
         armv7a) QT_ABI=armv7 ;;

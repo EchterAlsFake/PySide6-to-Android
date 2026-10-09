@@ -26,6 +26,8 @@ run_logged() {
     fi
 }
 
+run_logged "qt-host" bash "$ROOT/scripts/build-qt-host.sh"
+
 for abi in $ABIS; do
     run_logged "qt-$abi" bash "$ROOT/scripts/build-qt-android.sh" "$abi"
     for version in $PYTHON_VERSIONS; do

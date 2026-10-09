@@ -6,9 +6,24 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 WORK_ROOT=${WORK_ROOT:-"$ROOT/work"}
 QT_VERSION=${QT_VERSION:-6.12.0}
 JOBS=${JOBS:-4}
-ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-"$WORK_ROOT/android-sdk"}
+if [[ -z "${ANDROID_SDK_ROOT:-}" ]]; then
+    if [[ -d "$WORK_ROOT/android-sdk" ]]; then
+        ANDROID_SDK_ROOT="$WORK_ROOT/android-sdk"
+    else
+        ANDROID_SDK_ROOT="$HOME/.pyside6_android_deploy/android-sdk"
+    fi
+fi
 ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT:-"$HOME/.pyside6_android_deploy/android-ndk/android-ndk-r27c"}
-JAVA_HOME=${JAVA_HOME:-"$WORK_ROOT/jdk21"}
+
+if [[ -z "${JAVA_HOME:-}" ]]; then
+    if [[ -d "$WORK_ROOT/jdk21" ]]; then
+        JAVA_HOME="$WORK_ROOT/jdk21"
+    elif [[ -d "/usr/lib/jvm/java-21-openjdk" ]]; then
+        JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+    else
+        JAVA_HOME="/usr/lib/jvm/default"
+    fi
+fi
 export ANDROID_SDK_ROOT ANDROID_NDK_ROOT JAVA_HOME PATH="$JAVA_HOME/bin:$PATH"
 
 if (($# != 1)); then
@@ -28,10 +43,26 @@ HOST="$WORK_ROOT/qt/$QT_VERSION/gcc_64"
 TARGET="$WORK_ROOT/qt/$QT_VERSION/android_$QT_SUFFIX"
 BUILD="$WORK_ROOT/qt-build/android-$QT_SUFFIX"
 ALIGN_FLAGS='-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384'
-test -x "$SOURCE/configure"
-test -x "$HOST/bin/qt-cmake"
-test -f "$ANDROID_SDK_ROOT/platforms/android-36/android.jar"
-test -d "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64"
+
+if [[ ! -x "$SOURCE/configure" ]]; then
+    echo "Qt $QT_VERSION source tree missing at $SOURCE" >&2
+    echo "Download and extract qt-everywhere-src-$QT_VERSION.tar.xz into $WORK_ROOT" >&2
+    exit 1
+fi
+if [[ ! -x "$HOST/bin/qt-cmake" ]]; then
+    echo "Host Qt tools missing at $HOST/bin/qt-cmake" >&2
+    echo "Building host Qt tools first via scripts/build-qt-host.sh..." >&2
+    bash "$ROOT/scripts/build-qt-host.sh"
+fi
+if [[ ! -f "$ANDROID_SDK_ROOT/platforms/android-36/android.jar" ]]; then
+    echo "Android SDK platform 36 missing: $ANDROID_SDK_ROOT/platforms/android-36/android.jar" >&2
+    echo "Install via sdkmanager 'platforms;android-36'" >&2
+    exit 1
+fi
+if [[ ! -d "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64" ]]; then
+    echo "Android NDK missing at $ANDROID_NDK_ROOT" >&2
+    exit 1
+fi
 
 qt_prefix_complete() {
     local module
@@ -55,6 +86,7 @@ cd "$BUILD"
     -release -opensource -confirm-license \
     -nomake tests -nomake examples \
     -skip qtwebengine \
+    -qt-libmd4c \
     -submodules qtbase,qtdeclarative,qtshadertools,qtsvg,qttools,qtconnectivity,qtcharts,qtdatavis3d,qtgraphs,qthttpserver,qtlocation,qtmultimedia,qtnetworkauth,qtpositioning,qtquick3d,qtremoteobjects,qtscxml,qtsensors,qtserialbus,qtserialport,qtspeech,qtwebchannel,qtwebsockets,qtwebview,qt3d,qtcanvaspainter,qtquick3dphysics,qtlottie,qtquicktimeline,qtvirtualkeyboard \
     -- "-DCMAKE_SHARED_LINKER_FLAGS:STRING=$ALIGN_FLAGS" \
        "-DCMAKE_MODULE_LINKER_FLAGS:STRING=$ALIGN_FLAGS" \

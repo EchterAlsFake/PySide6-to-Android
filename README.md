@@ -20,14 +20,12 @@ If you have a problem with that, make your own :)
 
 ## Supported Versions
 
-- **Qt / PySide6:** `6.11.2`
-- **Official Android wheels:** Python `3.11`, AArch64 and x86_64
-- **Experimental source builds from the companion fork:** Python `3.10`–`3.14` on AArch64
+- **Qt / PySide6:** `6.12.0`
+- **Official Android wheels:** Python `3.10`–`3.14` (`cp310-abi3`), AArch64 and x86_64
+- **Experimental source builds from the companion fork:** Python `3.10`–`3.14` across all 4 architectures (`aarch64`, `armv7a`, `i686`, `x86_64`)
 
-> [!WARNING]
-> Python versions other than the official 3.11 require a source build. Wheels are not substitutes
-> for testing the complete Python runtime and application packaging on a real
-> Android device.
+> [!NOTE]
+> Starting with Qt 6.12, official Android wheels are compiled with PEP 384 Limited API (`cp310-abi3`), making them compatible across Python 3.10, 3.11, 3.12, 3.13, and 3.14 on supported 64-bit platforms (`aarch64` and `x86_64`). 32-bit architectures (`armv7a`, `i686`) were dropped upstream and require our companion fork source builds.
 
 ---
 
@@ -63,17 +61,17 @@ You’ll save hours of compilation time and avoid a lot of complexity.
 - Public archive: `https://download.qt.io/official_releases/QtForPython/`
 
 > [!NOTE]
-> As of now, official Android wheels are available for **`aarch64`** and **`x86_64`**.
+> Official Android wheels are published for **`aarch64`** and **`x86_64`**. For Qt 6.12.0, they use the `cp310-abi3` limited API tag, supporting Python 3.10 through 3.14 out of the box.
 
-**Direct links for 6.11.2 (Python 3.11):**
+**Direct links for 6.12.0 (Python 3.10–3.14 abi3):**
 
 - **PySide6**
-  - [aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/pyside6-6.11.2-6.11.2-cp311-cp311-android_aarch64.whl)
-  - [x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/pyside6-6.11.2-6.11.2-cp311-cp311-android_x86_64.whl)
+  - [aarch64](https://download.qt.io/official_releases/QtForPython/pyside6/pyside6-6.12.0-6.12.0-cp310-abi3-android_aarch64.whl)
+  - [x86_64](https://download.qt.io/official_releases/QtForPython/pyside6/pyside6-6.12.0-6.12.0-cp310-abi3-android_x86_64.whl)
 
 - **Shiboken6**
-  - [aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.11.2-6.11.2-cp311-cp311-android_aarch64.whl)
-  - [x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.11.2-6.11.2-cp311-cp311-android_x86_64.whl)
+  - [aarch64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.12.0-6.12.0-cp310-abi3-android_aarch64.whl)
+  - [x86_64](https://download.qt.io/official_releases/QtForPython/shiboken6/shiboken6-6.12.0-6.12.0-cp310-abi3-android_x86_64.whl)
 
 
 If you prefer building your own wheels, see [Building Qt and the Wheels Yourself](#building-qt-and-the-wheels-yourself).
@@ -323,17 +321,18 @@ pip install fastapi pydantic uvicorn
 The old workflow required editing `PYTHON_VERSION`, hand-fixing an ARM
 toolchain after generation, and repeatedly deleting a shared cache. Those
 workarounds are replaced by the companion
-[`pyside-setup-android`](https://github.com/EchterAlsFake/pyside-setup-android)
-fork.
+[`pyside-setup-android`](https://github.com/EchterAlsFake/pyside-setup)
+fork (branch `android-cross-build-fixes`).
 
-See the complete [Qt 6.11 source-build guide](SOURCE_BUILD_6.11.md). It covers:
+See the complete [Qt 6.12 source-build guide](SOURCE_BUILD_6.12.md). It covers:
 
-- building the exact same Qt version for the Linux host and Android;
+- building the exact same Qt 6.12.0 version for the Linux host and Android;
 - the extra host generators required by Quick3D, SCXML, RemoteObjects,
   CanvasPainter, and Lottie;
 - the SDK 36 versus native API 35 split;
 - separate, versioned CPython caches for 3.10 through 3.14;
-- the corrected ARM compiler flags and dynamically derived Python SOABI;
+- the corrected ARM compiler flags and 16 KiB page-alignment linker flags;
+- restoring 32-bit architecture support (`armv7a`, `i686`) dropped upstream;
 - known OpenSSL and optional CPython-module limitations.
 
 The [Android runtime helper](RUNTIME_BUILD.md) automates target builds of
@@ -341,12 +340,10 @@ OpenSSL, libffi, bzip2, xz, SQLite, and CPython, with optional installation of
 Arch Linux host build packages. It can also invoke the companion fork to build
 the corresponding PySide6 wheels.
 
-The source-build path has produced and statically validated AArch64 and armv7
-wheels for Python 3.10 through 3.14.
-Use `scripts/rebuild-android-matrix.sh` to build the remaining combinations.
+Use `scripts/rebuild-android-matrix.sh` to build the full 5 x 4 Android matrix.
 The artifacts have not yet been run in an APK; device and emulator testing
 remains necessary.
-The completed wheels and Android Python runtimes are backed up in the
+Historical Qt 6.11.2 wheels and Android Python runtimes are backed up in the
 [Qt 6.11.2 Android matrix prerelease](https://github.com/EchterAlsFake/PySide6-to-Android/releases/tag/android-matrix-snapshot-2026-09-30).
 
 ---

@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 WORK_ROOT=${WORK_ROOT:-"$ROOT/work"}
-QT_VERSION=${QT_VERSION:-6.11.2}
+QT_VERSION=${QT_VERSION:-6.12.0}
 JOBS=${JOBS:-4}
 ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-"$WORK_ROOT/android-sdk"}
 ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT:-"$HOME/.pyside6_android_deploy/android-ndk/android-ndk-r27c"}

@@ -168,3 +168,31 @@ runtime prefixes have been backed up to the GitHub prerelease
 `android-matrix-snapshot-2026-09-30`. The main build scripts are on `master`
 and the companion PySide fork is on branch `android-cross-build-fixes` at
 `https://github.com/EchterAlsFake/pyside-setup`.
+
+## 9 October 2026 — Qt 6.12.0 & PySide6 6.12.0 Matrix Update
+
+### 1. Upstream Qt 6.12.0 Changes
+The official Qt 6.12.0 and PySide6 6.12.0 releases introduce notable Android architectural changes:
+- **32-Bit Android Drop**: Upstream dropped support for `armv7a` and `i686` in `tools/cross_compile_android/` and `pyside6-android-deploy` (PYSIDE-3426 / PYSIDE-1612). Upstream now only advertises `aarch64` and `x86_64`.
+- **Prebuilt Python Download**: Upstream replaced the internal CPython cross-compile logic with downloading prebuilt Python 3.14.2 binaries from python.org, removing the ability to target Python 3.10–3.13 natively with custom extensions.
+- **PEP 384 Limited API (`cp310-abi3`)**: Upstream `setup.py` bdist_wheel invocation now passes `--limited-api=yes`, producing `cp310-abi3-android_aarch64.whl` and `cp310-abi3-android_x86_64.whl`. These wheels run across all Python 3.10–3.14 interpreters on the device.
+- **NDK Bump**: Upstream updated default NDK to r28c (`28.2.13676358`), while maintaining compatibility with r27c for Qt libraries.
+
+### 2. Remaining Upstream Defects
+- **Un-gated SSL Wrappers**: In `sources/pyside6/PySide6/QtNetwork/CMakeLists.txt`, `qsslellipticcurve_wrapper.cpp` and newly introduced `qsslkeyingmaterial_wrapper.cpp` remain unconditionally compiled outside the SSL feature check. In builds without Android OpenSSL, Shiboken does not generate these files, causing unity compilation failures.
+- **Toolchain Template Compiler/Linker Flags**: `tools/cross_compile_android/templates/toolchain_default.tmpl.cmake` still emits x86 flags (`-msse4.2`, `-mpopcnt`) for all targets and lacks explicit 16 KiB page-alignment linker flags (`-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384`).
+- **Loss of Matrix Flexibility**: Upstream dropped multi-version Python target specification, custom cache paths, and explicit `--qt-host-path` control.
+
+### 3. Companion Fork (`pyside-setup`) Updates
+The local companion checkout at `../pyside-setup-android` has been updated on branch `android-cross-build-fixes` (based on upstream tag `v6.12.0`):
+1. **SSL Gating**: Moved `qsslellipticcurve_wrapper.cpp` and `qsslkeyingmaterial_wrapper.cpp` into the `else()` branch of `if("ssl" IN_LIST QtNetwork_disabled_features)`.
+2. **16 KiB Page Alignment**: Updated `toolchain_default.tmpl.cmake` with `-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384` and guarded `-msse4.2` / `-mpopcnt` to x86/x86_64 only.
+3. **Full Matrix Restoration**: Re-enabled support for all 4 Android ABIs (`aarch64`, `armv7a`, `i686`, `x86_64`) and Python 3.10 through 3.14. Added `--limited-api` and `--dist-dir` options.
+
+### 4. Repository & Matrix Automation
+- `scripts/build-qt-android.sh`: Updated default `QT_VERSION` to `6.12.0`.
+- `scripts/build-android-runtime.sh`: Updated default `QT_PREFIX` to `6.12.0`, added support for copying and validating both version-specific (`cp<ver>-cp<ver>`) and limited-API (`cp310-abi3`) wheels.
+- `scripts/rebuild-android-matrix.sh`: Updated `QT_VERSION` to `6.12.0` and made stale build directory cleanup dynamic.
+- `scripts/check-android-matrix.sh`: Updated to verify Qt 6.12.0 Core headers and runtime/wheel pairs.
+- `scripts/check-android-wheels.py`: Updated wheel tag validation to accept `cp310-abi3` wheels for Python >= 3.10.
+- Source build guide `SOURCE_BUILD_6.12.md` created with official SHA-256 `98ff4f44bac6ec3e1e62ee2a4316ae0e3d15badb015d753cc0268a20db52f165` for `qt-everywhere-src-6.12.0.tar.xz`.

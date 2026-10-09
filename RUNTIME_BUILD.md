@@ -7,7 +7,7 @@ shared libraries beside `libpython` in the runtime prefix, where an APK
 packaging step can collect them. Source archive SHA-256 values are pinned in
 the script; downloaded archives are kept under `work/runtime-sources`.
 
-For the existing Qt 6.11.2 AArch64 installation, build a runtime and wheels:
+For the existing Qt 6.12.0 AArch64 installation, build a runtime and wheels:
 
 ```bash
 bash scripts/build-android-runtime.sh --python-version 3.12 --abi aarch64 --with-wheels

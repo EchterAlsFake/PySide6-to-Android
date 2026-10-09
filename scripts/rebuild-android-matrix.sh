@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 WORK_ROOT=${WORK_ROOT:-"$ROOT/work"}
 PYSIDE_FORK=${PYSIDE_FORK:-"$ROOT/../pyside-setup-android"}
+QT_VERSION=${QT_VERSION:-6.12.0}
 ABIS=${ABIS:-"aarch64 armv7a i686 x86_64"}
 PYTHON_VERSIONS=${PYTHON_VERSIONS:-"3.10 3.11 3.12 3.13 3.14"}
 RESUME=${RESUME:-0}
@@ -31,7 +32,7 @@ for abi in $ABIS; do
         short=${version/./}
         if [[ "$RESUME" == 1 ]]; then
             shopt -s nullglob
-            wheels=("$WORK_ROOT/wheels/py$short/"*"cp$short-cp$short-android_$abi.whl")
+            wheels=("$WORK_ROOT/wheels/py$short/"*"android_$abi.whl")
             shopt -u nullglob
             if bash "$ROOT/scripts/check-android-runtime.sh" "$version" "$abi" \
                 > /dev/null 2>&1 && \
@@ -44,7 +45,7 @@ for abi in $ABIS; do
         fi
         # setup.py can reuse CMake cache entries containing old link flags or
         # target paths. Keep the prior tree for diagnosis and configure afresh.
-        old_build="$PYSIDE_FORK/build/qfp-py$version-qt6.11.2-android_$abi-release"
+        old_build="$PYSIDE_FORK/build/qfp-py$version-qt$QT_VERSION-android_$abi-release"
         if [[ "$RESUME" != 1 && -d "$old_build" ]]; then
             mv "$old_build" "$WORK_ROOT/previous-target-builds/$(basename "$old_build")-$RUN_ID"
         fi

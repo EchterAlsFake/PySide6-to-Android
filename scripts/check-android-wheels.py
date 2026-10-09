@@ -49,12 +49,14 @@ def main() -> int:
     parser.add_argument("wheels", nargs="+", type=Path)
     args = parser.parse_args()
     tag = f"cp{args.python_version.replace('.', '')}-cp{args.python_version.replace('.', '')}"
+    py_tuple = tuple(map(int, args.python_version.split(".")))
     projects = {wheel.name.split("-", 1)[0].lower() for wheel in args.wheels}
     if projects != {"pyside6", "shiboken6"} or len(args.wheels) != 2:
         parser.error("expected exactly one PySide6 and one Shiboken6 wheel")
     count = 0
     for wheel in args.wheels:
-        if tag not in wheel.name or f"android_{args.abi}" not in wheel.name:
+        is_abi3 = "cp310-abi3" in wheel.name and py_tuple >= (3, 10)
+        if (tag not in wheel.name and not is_abi3) or f"android_{args.abi}" not in wheel.name:
             parser.error(f"wrong Python or ABI wheel tag: {wheel.name}")
         with zipfile.ZipFile(wheel) as archive:
             if archive.testzip() is not None:

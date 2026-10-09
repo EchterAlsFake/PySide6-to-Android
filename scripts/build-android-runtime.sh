@@ -227,7 +227,8 @@ if ((BUILD_WHEELS)); then
     # to native-library and target-runtime compilation above.
     unset CC CXX AR RANLIB STRIP READELF PKG_CONFIG LDFLAGS
     PYSIDE_FORK=${PYSIDE_FORK:-"$ROOT/../pyside-setup-android"}
-    QT_PREFIX=${QT_PREFIX:-"$WORK_ROOT/qt/6.11.2"}
+    QT_VERSION=${QT_VERSION:-6.12.0}
+    QT_PREFIX=${QT_PREFIX:-"$WORK_ROOT/qt/$QT_VERSION"}
     QT_HOST_PREFIX=${QT_HOST_PREFIX:-"$QT_PREFIX/gcc_64"}
     ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-"$WORK_ROOT/android-sdk"}
     case "$ABI" in
@@ -253,9 +254,17 @@ if ((BUILD_WHEELS)); then
         --qt-install-path "$QT_PREFIX" --qt-host-path "$QT_HOST_PREFIX" \
         --parallel "$JOBS"
     mkdir -p "$WORK_ROOT/wheels/py${PYTHON_VERSION/./}"
-    cp "$PYSIDE_FORK/dist/"*"cp${PYTHON_VERSION/./}-cp${PYTHON_VERSION/./}-android_$ABI.whl" \
-        "$WORK_ROOT/wheels/py${PYTHON_VERSION/./}/"
+    shopt -s nullglob
+    dist_wheels=("$PYSIDE_FORK/dist/"*"cp${PYTHON_VERSION/./}-cp${PYTHON_VERSION/./}-android_$ABI.whl" \
+                 "$PYSIDE_FORK/dist/"*"cp310-abi3-android_$ABI.whl")
+    shopt -u nullglob
+    if ((${#dist_wheels[@]} == 0)); then
+        echo "No matching wheel files found in $PYSIDE_FORK/dist/" >&2
+        exit 1
+    fi
+    cp "${dist_wheels[@]}" "$WORK_ROOT/wheels/py${PYTHON_VERSION/./}/"
+    copied_wheels=("$WORK_ROOT/wheels/py${PYTHON_VERSION/./}/"*"android_$ABI.whl")
     python3 "$ROOT/scripts/check-android-wheels.py" \
         --python-version "$PYTHON_VERSION" --abi "$ABI" \
-        "$WORK_ROOT/wheels/py${PYTHON_VERSION/./}/"*"cp${PYTHON_VERSION/./}-cp${PYTHON_VERSION/./}-android_$ABI.whl"
+        "${copied_wheels[@]}"
 fi

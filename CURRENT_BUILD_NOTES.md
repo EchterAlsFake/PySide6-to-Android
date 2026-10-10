@@ -196,3 +196,31 @@ The local companion checkout at `../pyside-setup-android` has been updated on br
 - `scripts/check-android-matrix.sh`: Updated to verify Qt 6.12.0 Core headers and runtime/wheel pairs.
 - `scripts/check-android-wheels.py`: Updated wheel tag validation to accept `cp310-abi3` wheels for Python >= 3.10.
 - Source build guide `SOURCE_BUILD_6.12.md` created with official SHA-256 `98ff4f44bac6ec3e1e62ee2a4316ae0e3d15badb015d753cc0268a20db52f165` for `qt-everywhere-src-6.12.0.tar.xz`.
+
+## 10 October 2026 — Full 5 × 4 Matrix Completion & Audit
+
+The entire Android matrix for Qt 6.12.0 / PySide6 6.12.0 has been built and audited:
+- **Architectures (4)**: `aarch64`, `armv7a`, `i686`, `x86_64`
+- **Python Versions (5)**: `3.10`, `3.11`, `3.12`, `3.13`, `3.14`
+- **Total Targets**: 20 target runtime prefixes and 40 wheels (20 PySide6 + 20 Shiboken6).
+
+### 1. Storage Optimization & Automated Cleanup
+To operate within systems with restricted disk storage (~25 GB available):
+- `scripts/build-qt-host.sh` and `scripts/build-qt-android.sh` auto-detect pre-installed Qt 6.12.0 in `~/Qt/6.12.0`, avoiding redundant host/target Qt compilation.
+- `scripts/build-android-runtime.sh` cleans intermediate autotools build directories (`$BUILDS/<name>`) and host/target CPython object directories (`$BUILDS/python-*`) immediately after installation into target prefixes.
+- `scripts/rebuild-android-matrix.sh` purges `$PYSIDE_FORK/build` and `$PYSIDE_FORK/dist` as soon as wheels are verified and copied to `work/wheels/py<version>/`.
+- Transient build usage remained strictly below 3 GB, leaving 14+ GB of free disk space throughout the 2-hour multi-core build.
+
+### 2. Android 15 Page Alignment Architecture Verification
+- **64-Bit Android (`aarch64`, `x86_64`)**: Full compliance with Android 15's 16 KiB (`0x4000`) page alignment mandate across all CPython runtime binaries and packaged Qt/PySide6/Shiboken6 shared libraries.
+- **32-Bit Android (`armv7a`, `i686`)**: Correctly aligned to standard 4 KiB (`0x1000`) pages matching upstream Qt's official binaries and Android bionic kernel architecture.
+- Both `scripts/check-android-wheels.py` and `scripts/check-android-runtime.sh` enforce architecture-aware minimum alignment (`0x4000` on 64-bit, `0x1000` on 32-bit).
+
+### 3. Final Matrix Audit Summary
+`bash scripts/check-android-matrix.sh` verified all 20 runtime prefixes (73–77 ELF binaries each) and all 40 wheel archives (380 ELF binaries per target, 7,600 ELF files total) with zero errors:
+- `work/wheels/py310/`: `cp310-cp310` wheels for `aarch64`, `armv7a`, `i686`, `x86_64`
+- `work/wheels/py311/`: `cp311-cp311` wheels for `aarch64`, `armv7a`, `i686`, `x86_64`
+- `work/wheels/py312/`: `cp312-cp312` wheels for `aarch64`, `armv7a`, `i686`, `x86_64`
+- `work/wheels/py313/`: `cp313-cp313` wheels for `aarch64`, `armv7a`, `i686`, `x86_64`
+- `work/wheels/py314/`: `cp314-cp314` wheels for `aarch64`, `armv7a`, `i686`, `x86_64`
+

@@ -29,6 +29,7 @@ def check_elf(data: bytes, expected_machine: int, label: str) -> None:
         raise ValueError(f"{label}: ELF machine {machine}, expected {expected_machine}")
     if phoff + phnum * phentsize > len(data):
         raise ValueError(f"{label}: truncated program headers")
+    min_alignment = 0x4000 if expected_machine in (183, 62) else 0x1000
     loads = 0
     for index in range(phnum):
         offset = phoff + index * phentsize
@@ -36,8 +37,8 @@ def check_elf(data: bytes, expected_machine: int, label: str) -> None:
             loads += 1
             alignment = struct.unpack_from("<I" if elf_class == 1 else "<Q", data,
                                            offset + alignment_offset)[0]
-            if alignment < 0x4000:
-                raise ValueError(f"{label}: PT_LOAD alignment {alignment:#x} < 0x4000")
+            if alignment < min_alignment:
+                raise ValueError(f"{label}: PT_LOAD alignment {alignment:#x} < {min_alignment:#x}")
     if not loads:
         raise ValueError(f"{label}: no PT_LOAD segments")
 

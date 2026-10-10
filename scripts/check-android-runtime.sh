@@ -12,10 +12,10 @@ PYTAG=${PYTHON_VERSION/./_}
 PREFIX="$WORK_ROOT/cache/py${PYTHON_VERSION/./}/Python-$ABI-linux-android-$PYTAG/_install"
 
 case "$ABI" in
-    aarch64) MACHINE='AArch64' ;;
-    armv7a) MACHINE='ARM' ;;
-    i686) MACHINE='Intel 80386' ;;
-    x86_64) MACHINE='Advanced Micro Devices X86-64' ;;
+    aarch64) MACHINE='AArch64'; MIN_ALIGN=0x4000 ;;
+    armv7a) MACHINE='ARM'; MIN_ALIGN=0x1000 ;;
+    i686) MACHINE='Intel 80386'; MIN_ALIGN=0x1000 ;;
+    x86_64) MACHINE='Advanced Micro Devices X86-64'; MIN_ALIGN=0x4000 ;;
     *) echo "Unknown ABI: $ABI" >&2; exit 2 ;;
 esac
 
@@ -45,8 +45,8 @@ while IFS= read -r -d '' shared_object; do
     alignments=$(readelf -Wl "$shared_object" | awk '$1 == "LOAD" { print $NF }')
     test -n "$alignments" || { echo "No LOAD segments: $shared_object" >&2; exit 1; }
     while read -r alignment; do
-        if (( alignment < 0x4000 )); then
-            echo "ELF alignment below 16 KiB: $shared_object ($alignment)" >&2
+        if (( alignment < MIN_ALIGN )); then
+            echo "ELF alignment below minimum: $shared_object ($alignment < $MIN_ALIGN)" >&2
             exit 1
         fi
     done <<< "$alignments"

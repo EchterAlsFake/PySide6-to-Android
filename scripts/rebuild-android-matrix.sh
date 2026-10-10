@@ -8,6 +8,8 @@ PYSIDE_FORK=${PYSIDE_FORK:-"$ROOT/../pyside-setup-android"}
 QT_VERSION=${QT_VERSION:-6.12.0}
 ABIS=${ABIS:-"aarch64 armv7a i686 x86_64"}
 PYTHON_VERSIONS=${PYTHON_VERSIONS:-"3.10 3.11 3.12 3.13 3.14"}
+JOBS=${JOBS:-$(nproc 2>/dev/null || echo 4)}
+export JOBS
 RESUME=${RESUME:-0}
 RUN_ID=$(date -u +%Y%m%dT%H%M%SZ)
 LOG_DIR="$WORK_ROOT/logs/matrix-$RUN_ID"

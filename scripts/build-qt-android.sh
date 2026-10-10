@@ -44,6 +44,23 @@ TARGET="$WORK_ROOT/qt/$QT_VERSION/android_$QT_SUFFIX"
 BUILD="$WORK_ROOT/qt-build/android-$QT_SUFFIX"
 ALIGN_FLAGS='-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384'
 
+if [[ ! -d "$WORK_ROOT/qt/$QT_VERSION" && -d "${HOME}/Qt/$QT_VERSION" ]]; then
+    mkdir -p "$WORK_ROOT/qt"
+    ln -sfn "${HOME}/Qt/$QT_VERSION" "$WORK_ROOT/qt/$QT_VERSION"
+fi
+
+qt_prefix_complete() {
+    local module
+    for module in Qt6Core Qt6Qml Qt6Charts Qt6VirtualKeyboard; do
+        [[ -f "$TARGET/lib/cmake/$module/${module}Config.cmake" ]] || return 1
+    done
+}
+
+if qt_prefix_complete; then
+    echo "Qt prefix already installed: $TARGET"
+    exit 0
+fi
+
 if [[ ! -x "$SOURCE/configure" ]]; then
     echo "Qt $QT_VERSION source tree missing at $SOURCE" >&2
     echo "Download and extract qt-everywhere-src-$QT_VERSION.tar.xz into $WORK_ROOT" >&2
@@ -62,18 +79,6 @@ fi
 if [[ ! -d "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64" ]]; then
     echo "Android NDK missing at $ANDROID_NDK_ROOT" >&2
     exit 1
-fi
-
-qt_prefix_complete() {
-    local module
-    for module in Qt6Core Qt6Qml         Qt6Charts Qt6VirtualKeyboard; do
-        [[ -f "$TARGET/lib/cmake/$module/${module}Config.cmake" ]] || return 1
-    done
-}
-
-if qt_prefix_complete; then
-    echo "Qt prefix already installed: $TARGET"
-    exit 0
 fi
 mkdir -p "$BUILD"
 cd "$BUILD"

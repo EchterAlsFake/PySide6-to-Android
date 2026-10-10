@@ -9,18 +9,23 @@ JOBS=${JOBS:-$(nproc 2>/dev/null || echo 4)}
 SOURCE="$WORK_ROOT/qt-everywhere-src-$QT_VERSION"
 HOST="$WORK_ROOT/qt/$QT_VERSION/gcc_64"
 
+if [[ ! -d "$WORK_ROOT/qt/$QT_VERSION" && -d "${HOME}/Qt/$QT_VERSION" ]]; then
+    mkdir -p "$WORK_ROOT/qt"
+    ln -sfn "${HOME}/Qt/$QT_VERSION" "$WORK_ROOT/qt/$QT_VERSION"
+fi
+
 host_tools_complete() {
     [[ -x "$HOST/bin/qt-cmake" ]] || return 1
-    [[ -x "$HOST/bin/moc" ]] || return 1
-    [[ -x "$HOST/bin/rcc" ]] || return 1
-    [[ -x "$HOST/bin/qmlcachegen" ]] || return 1
-    [[ -x "$HOST/bin/qsb" ]] || return 1
-    [[ -x "$HOST/bin/lconvert" ]] || return 1
-    [[ -x "$HOST/bin/balsam" ]] || return 1
-    [[ -x "$HOST/bin/qscxmlc" ]] || return 1
-    [[ -x "$HOST/bin/repc" ]] || return 1
-    [[ -x "$HOST/bin/qcshadergen" ]] || return 1
-    [[ -x "$HOST/bin/lottietoqml" ]] || return 1
+    [[ -x "$HOST/bin/moc" || -x "$HOST/libexec/moc" ]] || return 1
+    [[ -x "$HOST/bin/rcc" || -x "$HOST/libexec/rcc" ]] || return 1
+    [[ -x "$HOST/bin/qmlcachegen" || -x "$HOST/libexec/qmlcachegen" ]] || return 1
+    [[ -x "$HOST/bin/qsb" || -x "$HOST/libexec/qsb" ]] || return 1
+    [[ -x "$HOST/bin/lconvert" || -x "$HOST/libexec/lconvert" ]] || return 1
+    [[ -x "$HOST/bin/balsam" || -x "$HOST/libexec/balsam" ]] || return 1
+    [[ -x "$HOST/bin/qscxmlc" || -x "$HOST/libexec/qscxmlc" ]] || return 1
+    [[ -x "$HOST/bin/repc" || -x "$HOST/libexec/repc" ]] || return 1
+    [[ -x "$HOST/bin/qcshadergen" || -x "$HOST/libexec/qcshadergen" ]] || return 1
+    [[ -x "$HOST/bin/lottietoqml" || -x "$HOST/libexec/lottietoqml" ]] || return 1
     return 0
 }
 

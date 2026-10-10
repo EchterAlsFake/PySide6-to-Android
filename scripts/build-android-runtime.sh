@@ -252,6 +252,8 @@ if ((BUILD_WHEELS)); then
     fi
     "$VENV/bin/python" -m pip install -r "$PYSIDE_FORK/requirements.txt" \
         -r "$PYSIDE_FORK/tools/cross_compile_android/requirements.txt"
+    rm -rf "$PYSIDE_FORK/dist"
+    mkdir -p "$PYSIDE_FORK/dist"
     "$VENV/bin/python" "$PYSIDE_FORK/tools/cross_compile_android/main.py" \
         --plat-name "$ABI" --python-version "$PYTHON_VERSION" \
         --cache-dir "$WORK_ROOT/cache/py${PYTHON_VERSION/./}" \

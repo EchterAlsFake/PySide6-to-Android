@@ -47,14 +47,15 @@ for abi in $ABIS; do
                 continue
             fi
         fi
-        # setup.py can reuse CMake cache entries containing old link flags or
-        # target paths. Keep the prior tree for diagnosis and configure afresh.
-        old_build="$PYSIDE_FORK/build/qfp-py$version-qt$QT_VERSION-android_$abi-release"
-        if [[ "$RESUME" != 1 && -d "$old_build" ]]; then
-            mv "$old_build" "$WORK_ROOT/previous-target-builds/$(basename "$old_build")-$RUN_ID"
-        fi
+        # Ensure clean state for build
+        rm -rf "$PYSIDE_FORK/build"
         run_logged "py$short-$abi" bash "$ROOT/scripts/build-android-runtime.sh" \
             --python-version "$version" --abi "$abi" --with-wheels
+        # Clean up temporary build trees to conserve disk space
+        rm -rf "$PYSIDE_FORK/build"
+        rm -rf "$PYSIDE_FORK/dist"
+        rm -rf "$WORK_ROOT/runtime-build"
+        echo "[$(date -u +%FT%TZ)] Cleaned build cache for py$short-$abi; free space: $(df -h / | awk 'NR==2{print $4}')"
     done
 done
 

@@ -113,6 +113,7 @@ build_autotools() {
         make -j "$JOBS"
         make install
     )
+    rm -rf "$BUILDS/$name"
     touch "$DEPS/.${name}.16k.done"
 }
 
@@ -166,6 +167,7 @@ if [[ ! -x "$HOST/bin/python$PYTHON_VERSION" ]]; then
         make -j "$JOBS"
         make install
     )
+    rm -rf "$BUILDS/python-host-$PYTAG"
 fi
 
 if [[ ! -f "$TARGET/.runtime-openssl-3.5.8-16k.done" ]]; then
@@ -205,6 +207,7 @@ if [[ ! -f "$TARGET/.runtime-openssl-3.5.8-16k.done" ]]; then
             fi
         done
     )
+    rm -rf "$BUILDS/python-target-$PYTAG"
 fi
 
 # Keep shared native libraries alongside the runtime for APK packaging.
@@ -275,4 +278,6 @@ if ((BUILD_WHEELS)); then
     python3 "$ROOT/scripts/check-android-wheels.py" \
         --python-version "$PYTHON_VERSION" --abi "$ABI" \
         "${copied_wheels[@]}"
+    rm -rf "$PYSIDE_FORK/build"
+    rm -rf "$PYSIDE_FORK/dist"
 fi

@@ -21,6 +21,7 @@ If you have a problem with that, make your own :)
 ## Supported Versions
 
 - **Qt / PySide6:** `6.12.0`
+- **Android NDK for this fork:** r28c (`28.2.13676358`)
 - **Official Android wheels:** Python `3.10`–`3.14` (`cp310-abi3`), AArch64 and x86_64
 - **Experimental source builds from the companion fork:** Python `3.10`–`3.14` across all 4 architectures (`aarch64`, `armv7a`, `i686`, `x86_64`)
 
@@ -111,7 +112,14 @@ python tools/cross_compile_android/main.py --download-only --auto-accept-license
 After running the script, the tools are placed at:
 
 - **Android SDK:** `~/.pyside6_android_deploy/android-sdk/`
-- **Android NDK:** `~/.pyside6_android_deploy/android-ndk/android-ndk-r27c/`
+- **Android NDK:** `~/.pyside6_android_deploy/android-ndk/android-ndk-r28c/`
+
+This guide and the companion fork use **r28c** for native builds and
+`pyside6-android-deploy`. Qt's prebuilt Android libraries may still have been
+built with r27c; using them does not rebuild Qt with r28c. This is the fork's
+tested toolchain choice, separate from [Qt's supported NDK configuration](https://doc.qt.io/qt-6/android.html#supported-configurations).
+Existing `pysidedeploy.spec` and `buildozer.spec` files retain explicit NDK
+paths: update those paths, or pass `--ndk-path` below, when migrating.
 
 ---
 
@@ -136,7 +144,7 @@ Key options you’ll likely touch:
 - `package.domain`: Reverse‑DNS app identifier (unique in the Android ecosystem).
 - `orientation`: `portrait` or `landscape`.
 - `android.api`: Target API level (use current stable / highest you can).
-- `android.minapi`: Minimum supported API. Qt 6.11 requires API 28 or newer;
+- `android.minapi`: Minimum supported API. Qt 6.12 requires API 28 or newer;
   your other native libraries may require a higher value.
 
 Every dependency containing native code needs an Android wheel for the same
@@ -171,10 +179,10 @@ From your project’s source directory, run:
 
 ```bash
 pyside6-android-deploy \
-    --wheel-pyside=/path/to/PySide6-6.11.2-...-android_<arch>.whl \
-    --wheel-shiboken=/path/to/shiboken6-6.11.2-...-android_<arch>.whl \
+    --wheel-pyside=/path/to/pyside6-6.12.0-...-android_<arch>.whl \
+    --wheel-shiboken=/path/to/shiboken6-6.12.0-...-android_<arch>.whl \
     --name=main \
-    --ndk-path ~/.pyside6_android_deploy/android-ndk/android-ndk-r27c \
+    --ndk-path ~/.pyside6_android_deploy/android-ndk/android-ndk-r28c \
     --sdk-path ~/.pyside6_android_deploy/android-sdk/
 ```
 
@@ -311,7 +319,7 @@ pip install fastapi pydantic uvicorn
 ```
 
 > [!IMPORTANT]
-> Use **JDK 21 or newer** with Qt 6.11. Older JDK 17 instructions apply to
+> Use **JDK 21 or newer** with Qt 6.12. Older JDK 17 instructions apply to
 > earlier Qt releases and fail the current toolchain requirement.
 
 ---

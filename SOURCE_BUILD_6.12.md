@@ -24,14 +24,19 @@ Use matching Qt and PySide sources. This build was tested with:
 | JDK | 21 | Qt 6.12 requires JDK 21 or newer |
 | Android SDK platform | 36 | Required by Qt 6.12 Java sources (`android.jar`) |
 | Android build tools | 36.0.0 | Qt 6.12 documented version |
-| Android NDK | r27c / r28c | r27c for Qt libraries; r28c supported |
-| CPython native API | 35 | NDK r27c native compiler wrapper API |
+| Android NDK | r28c (`28.2.13676358`) | Default for this fork's builds and deployment |
+| CPython native API | 35 | Explicit native target, separate from the Java SDK |
 | Qt minimum Android API | 28 | Android runtime minimum API |
 
-SDK API 36 and native API 35 are deliberately different. Qt 6.12's Java
-sources need `platforms/android-36/android.jar`, while NDK r27c ships native
-compiler wrappers through API 35. Passing API 36 to the CPython build therefore
-fails because `aarch64-linux-android36-clang` does not exist in NDK r27c.
+SDK API 36 and native API 35 are deliberately different. The helper uses
+`platforms/android-36/android.jar` for Qt's Java bindings and API 35 for
+CPython and native bindings. `--sdk-api-level` selects the Java SDK without
+changing the native target selected by `--api-level`.
+
+Qt's installer binaries may still have been built with r27c. Reusing those
+prefixes tests r28c-built Python and bindings against prebuilt Qt; it does not
+rebuild Qt. To compile Qt itself with r28c, use the source-build steps below
+with fresh target build and installation directories.
 
 In addition to a C/C++ build toolchain, CMake, Ninja, Git, and `zip`, each
 wheel build needs a host Python with the same major/minor version as the
@@ -52,7 +57,7 @@ export QT_PREFIX="$BUILD_ROOT/qt/$QT_VERSION"
 export QT_HOST_PREFIX="$QT_PREFIX/gcc_64"
 export QT_ANDROID_PREFIX="$QT_PREFIX/android_arm64_v8a"
 export ANDROID_SDK_ROOT="$BUILD_ROOT/android-sdk"
-export ANDROID_NDK_ROOT="$HOME/.pyside6_android_deploy/android-ndk/android-ndk-r27c"
+export ANDROID_NDK_ROOT="$HOME/.pyside6_android_deploy/android-ndk/android-ndk-r28c"
 export JAVA_HOME="$BUILD_ROOT/jdk21"
 export PATH="$JAVA_HOME/bin:$PATH"
 

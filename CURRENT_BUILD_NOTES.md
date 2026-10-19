@@ -224,3 +224,64 @@ To operate within systems with restricted disk storage (~25 GB available):
 - `work/wheels/py313/`: `cp313-cp313` wheels for `aarch64`, `armv7a`, `i686`, `x86_64`
 - `work/wheels/py314/`: `cp314-cp314` wheels for `aarch64`, `armv7a`, `i686`, `x86_64`
 
+## 19 October 2026 — permanent r28c default and clean build
+
+The current guide and build scripts now default to Android NDK **r28c
+(`28.2.13676358`)**. The companion fork uses the same default for wheel
+compilation and `pyside6-android-deploy`; explicit NDK paths still take
+precedence. The fork's CLI help and Android build instructions now agree with
+that default. Native CMake settings consistently use API 35, and the helper
+passes the separate SDK API 36 to Java compilation.
+
+Runtime/dependency prefixes record the NDK revision and native API in
+`.android-toolchain`. Builds reject mismatched or unrecorded cached prefixes,
+and runtime audits check the record before a matrix resume can skip a target.
+Checks confirmed that an r27c cache and an unrecorded cache are both rejected.
+
+A clean AArch64/Python 3.11 build completed using the maintained runtime
+script and companion fork at
+[`4a1b4e0e2`](https://github.com/EchterAlsFake/pyside-setup/commit/4a1b4e0e2).
+The native dependencies, target CPython, Shiboken generator, PySide/Shiboken
+bindings, and wheel packaging used fresh installation/build directories.
+Only verified source archives, the host Python interpreter, installed SDK/NDK,
+and the installed Qt prefixes were reused.
+
+| Component | Clean-build configuration |
+| --- | --- |
+| Qt / PySide / Shiboken | 6.12.0 |
+| Target | AArch64, native API 35 |
+| NDK / compiler | r28c (`28.2.13676358`), Clang 19.0.1 |
+| Target CPython | 3.11.17, source commit `59d1bd5f0beb95f26771a96fe11eac1653d69ffa` |
+| Host CPython | 3.11.16 |
+| SDK / build tools / JDK | 36 / 36.0.0 / OpenJDK 21 |
+| Qt prefixes | Existing installer Qt 6.12.0, built with r27c |
+
+The runtime audit passed **75** AArch64 shared objects, including `_ssl`,
+`_hashlib`, `_ctypes`, `_bz2`, `_lzma`, and `_sqlite3`. Both wheels passed ZIP
+integrity, Python/ABI tag, AArch64 ELF architecture, and 16 KiB load-alignment
+checks across **221** packaged shared objects. The runtime objects and all
+**32** newly built binding objects contain the r28c NDK identity; the bindings
+depend on `libpython3.11.so`. Java compilation produced
+`Qt6AndroidBindings.jar` successfully with SDK 36.
+
+| Wheel | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `pyside6-6.12.0-6.12.0-cp311-cp311-android_aarch64.whl` | 67,162,470 | `8c8e2ee33300c34844854bd7720912412c08df4754d982b932ed7d1768c46455` |
+| `shiboken6-6.12.0-6.12.0-cp311-cp311-android_aarch64.whl` | 280,458 | `73dbe32b8ca85a3655a34cd0f04fb535e3c6ec39cbd71a27a10a53408999f46f` |
+
+For a fresh checkout with the toolchains installed, the equivalent command is:
+
+```bash
+WORK_ROOT="$PWD/work/r28c-clean" \
+PYSIDE_FORK="$HOME/pyside-setup" \
+QT_PREFIX="$HOME/Qt/6.12.0" \
+QT_HOST_PREFIX="$HOME/Qt/6.12.0/gcc_64" \
+JOBS=4 bash scripts/build-android-runtime.sh \
+    --python-version 3.11 --abi aarch64 --with-wheels
+```
+
+This validates the r28c source-built Python and bindings against prebuilt Qt.
+Qt itself was not rebuilt, and no APK was installed or run on a device or
+emulator. Other Python/ABI combinations were not rebuilt in this r28c check;
+the older matrix results above remain historical results.
+

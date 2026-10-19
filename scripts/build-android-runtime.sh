@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 WORK_ROOT=${WORK_ROOT:-"$ROOT/work"}
-NDK_ROOT=${ANDROID_NDK_ROOT:-"$HOME/.pyside6_android_deploy/android-ndk/android-ndk-r27c"}
+NDK_ROOT=${ANDROID_NDK_ROOT:-"$HOME/.pyside6_android_deploy/android-ndk/android-ndk-r28c"}
 API=${ANDROID_NATIVE_API:-35}
 JOBS=${JOBS:-4}
 PYTHON_VERSION=
@@ -74,7 +74,7 @@ export CC CXX
 export AR="$TOOLBIN/llvm-ar" RANLIB="$TOOLBIN/llvm-ranlib" STRIP="$TOOLBIN/llvm-strip"
 export READELF="$TOOLBIN/llvm-readelf"
 export PKG_CONFIG=/bin/false
-# NDK r27 needs both flags for 16 KiB page-size compatibility.
+# Keep alignment explicit for all supported ABIs and NDK overrides.
 ALIGN_FLAGS='-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384'
 export LDFLAGS="$ALIGN_FLAGS"
 
@@ -86,6 +86,26 @@ TARGET="$WORK_ROOT/cache/py${PYTHON_VERSION/./}/Python-$ABI-linux-android-$PYTAG
 HOST="$WORK_ROOT/host-python/$PYTHON_VERSION"
 PY_SOURCE="$WORK_ROOT/cache/py${PYTHON_VERSION/./}/cpython-$PYTAG"
 mkdir -p "$SOURCES" "$BUILDS" "$DEPS" "$(dirname "$TARGET")" "$(dirname "$HOST")"
+
+# Completion markers alone cannot distinguish libraries built with an older
+# NDK. Reject those prefixes rather than silently reusing them after a switch.
+NDK_REVISION=$(sed -n 's/^Pkg.Revision[[:space:]]*=[[:space:]]*//p' "$NDK_ROOT/source.properties" | tr -d '\r')
+test -n "$NDK_REVISION" || { echo "Missing NDK revision in $NDK_ROOT/source.properties" >&2; exit 2; }
+TOOLCHAIN_ID="$NDK_REVISION:api$API"
+for prefix in "$DEPS" "$TARGET"; do
+    stamp="$prefix/.android-toolchain"
+    if [[ -d "$prefix" && -n "$(find "$prefix" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
+        if [[ ! -f "$stamp" || "$(cat "$stamp")" != "$TOOLCHAIN_ID" ]]; then
+            echo "Cached Android prefix uses a different or unrecorded NDK/API: $prefix" >&2
+            echo "Select a fresh WORK_ROOT to rebuild with NDK $NDK_REVISION, API $API." >&2
+            exit 2
+        fi
+    fi
+done
+for prefix in "$DEPS" "$TARGET"; do
+    mkdir -p "$prefix"
+    printf '%s\n' "$TOOLCHAIN_ID" > "$prefix/.android-toolchain"
+done
 
 fetch_tar() {
     local name=$1 url=$2 expected=$3 archive="$SOURCES/$1.tar.gz"

@@ -13,7 +13,7 @@ if [[ -z "${ANDROID_SDK_ROOT:-}" ]]; then
         ANDROID_SDK_ROOT="$HOME/.pyside6_android_deploy/android-sdk"
     fi
 fi
-ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT:-"$HOME/.pyside6_android_deploy/android-ndk/android-ndk-r27c"}
+ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT:-"$HOME/.pyside6_android_deploy/android-ndk/android-ndk-r28c"}
 
 if [[ -z "${JAVA_HOME:-}" ]]; then
     if [[ -d "$WORK_ROOT/jdk21" ]]; then

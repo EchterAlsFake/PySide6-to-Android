@@ -10,6 +10,15 @@ PYTHON_VERSION=${1:?Usage: check-android-runtime.sh PYTHON_VERSION [ABI]}
 ABI=${2:-aarch64}
 PYTAG=${PYTHON_VERSION/./_}
 PREFIX="$WORK_ROOT/cache/py${PYTHON_VERSION/./}/Python-$ABI-linux-android-$PYTAG/_install"
+NDK_ROOT=${ANDROID_NDK_ROOT:-"$HOME/.pyside6_android_deploy/android-ndk/android-ndk-r28c"}
+NDK_REVISION=28.2.13676358
+if [[ -f "$NDK_ROOT/source.properties" ]]; then
+    NDK_REVISION=$(sed -n 's/^Pkg.Revision[[:space:]]*=[[:space:]]*//p' "$NDK_ROOT/source.properties" | tr -d '\r')
+fi
+if [[ ! -f "$PREFIX/.android-toolchain" || "$(cat "$PREFIX/.android-toolchain")" != "$NDK_REVISION:api$API" ]]; then
+    echo "Runtime NDK/API provenance does not match NDK $NDK_REVISION, API $API: $PREFIX" >&2
+    exit 1
+fi
 
 case "$ABI" in
     aarch64) MACHINE='AArch64'; MIN_ALIGN=0x4000 ;;
@@ -53,4 +62,4 @@ while IFS= read -r -d '' shared_object; do
     ((count += 1))
 done < <(find "$PREFIX/lib" -type f -name '*.so*' -print0)
 
-echo "Validated $count Android $ABI ELF files and CPython $PYTHON_VERSION native modules (API $API)."
+echo "Validated $count Android $ABI ELF files and CPython $PYTHON_VERSION native modules (API $API, NDK $NDK_REVISION)."

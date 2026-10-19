@@ -1,5 +1,8 @@
 # Source-build Qt 6.11 and PySide6 Android wheels
 
+This is the historical Qt 6.11/r27c procedure. For the current Qt 6.12/r28c
+defaults, use [SOURCE_BUILD_6.12.md](SOURCE_BUILD_6.12.md).
+
 This is the reproducible source-build path for Qt/PySide 6.11.2. It targets
 Android AArch64 (`arm64-v8a` / wheel platform `android_aarch64`) and supports
 separate wheel builds for CPython 3.10 through 3.14.

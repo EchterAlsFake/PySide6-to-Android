@@ -14,6 +14,27 @@ bash scripts/build-android-runtime.sh --python-version 3.12 --abi aarch64 --with
 bash scripts/build-android-runtime.sh --python-version 3.13 --abi aarch64 --with-wheels
 ```
 
+The default NDK is **r28c (`28.2.13676358`)** at
+`~/.pyside6_android_deploy/android-ndk/android-ndk-r28c`.
+When migrating from an existing build, select a new output root:
+
+```bash
+export WORK_ROOT="$PWD/work/r28c"
+export PYSIDE_FORK="$HOME/pyside-setup"
+export QT_PREFIX="$HOME/Qt/6.12.0"
+export QT_HOST_PREFIX="$QT_PREFIX/gcc_64"
+bash scripts/build-android-runtime.sh --python-version 3.11 --abi aarch64 --with-wheels
+```
+
+Keep `PYSIDE_FORK` pointed at the companion fork's `android-cross-build-fixes`
+checkout. Runtime prefixes record the NDK revision and native API in
+`.android-toolchain`; the helper refuses older or unrecorded cached prefixes
+instead of reusing r27c binaries after the switch. Downloaded source archives
+and host interpreters can be reused; native dependencies, target Python, and
+wheel build trees must be fresh for a clean build.
+Runtime audits also check this provenance, so `RESUME=1` does not skip an
+older runtime merely because its ELF architecture and alignment pass.
+
 Build Qt, runtimes, and both wheels for all four Android ABIs and Python
 3.10–3.14 with one command:
 
@@ -66,7 +87,7 @@ install host build packages with `sudo pacman`. This step is optional; normally
 the helper just reports missing tools. It does not change installed packages
 unless the flag is given.
 
-The build uses NDK r27c native API 35 by default, separate from the SDK API
+The build uses NDK r28c native API 35 by default, separate from the SDK API
 36 used by Qt's Java sources. The Qt prefix in this checkout was built without
 Android OpenSSL, so its QtNetwork HTTPS support remains disabled even when
 Python's `ssl` module is present. Rebuilding Qt with an Android OpenSSL prefix
